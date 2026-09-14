@@ -20,7 +20,7 @@ a13i-lab/
 │   ├── exploding-chemicals-dexter.gif   # el meme del encabezado
 │   ├── mom.png        # la madre de Dexter, recortada — la usa la nota del Mom Test
 │   ├── mom.jpg        # el original que subió Axel; de acá salió el .png, la página no lo usa
-│   └── og-image.jpg   # copiado de accelerator — pendiente uno propio del lab
+│   └── og-lab.jpg     # la preview de compartir, dibujada acá (ver abajo)
 ├── favicon/        # mismo set que accelerator
 └── README.md
 ```
@@ -164,6 +164,17 @@ La nota del Mom Test usa `assets/mom.png`. El original que subió Axel (`mom.jpg
 
 **Si no carga ninguna, el `onerror` del `<img>` muestra un dibujo propio de matraces** (inline en el HTML, clase `.meme-fb`) y la página no se ve rota. Es material de Cartoon Network / Warner: uso de meme, decisión de Axel.
 
+### La preview de compartir (`og:image`)
+
+`assets/og-lab.jpg`, 2400×1260 (el doble de los 1200×630 estándar, para que no se vea blando en pantallas retina). **Es ilustración propia, no un frame del dibujito:** un matraz explotando entre dos tubos de ensayo, en la paleta del sitio, con el wordmark, el título y el mismo subrayado de roughjs del H1. Dexter aparece nombrado en el texto, no dibujado — una cosa es un meme adentro de la página y otra es que la tarjeta que representa el sitio en WhatsApp o LinkedIn sea material de un tercero.
+
+**Cómo se rehace.** No se edita el JPG, se regenera. La fuente está en el scratchpad de la sesión que lo creó, pero reconstruirlo es directo: un HTML de 1200×630 con el diseño, y una captura con Playwright a `deviceScaleFactor: 2`. Dos detalles que hacen falta si el entorno bloquea CDNs:
+
+- Las tipografías salen de npm, no de Google Fonts: `npm pack geist` y `npm pack @fontsource/space-grotesk`, y se declaran con `@font-face` apuntando a los `.woff2` locales. Sin eso el render sale con la fuente del sistema y no matchea la marca.
+- Para el subrayado, `npm pack roughjs@4.6.6` y se sirve el `bundled/rough.js` local.
+
+Se exporta a JPEG progresivo con calidad 90: queda en ~180 KB, contra 1,6 MB del PNG. Ningún scraper se queja de eso.
+
 ### Subrayado y resaltado del H1
 
 Los dos están **portados del hero de `a13i-accelerator`**, que no usa rough-notation sino **roughjs directo** (`https://unpkg.com/roughjs@4.6.6/bundled/rough.js`, pinneada). Eso es lo que da el trazo dibujado a mano; rough-notation con parámetros parecidos queda bastante peor.
@@ -208,8 +219,7 @@ Push a `main` → auto-deploy en Vercel.
 ## 📌 Pendientes
 
 1. Capturas reales de los tres proyectos, para reemplazar el arte generado (campo `imagen`).
-2. `og:image` propio del lab (hoy reusa el genérico de accelerator).
-3. Confirmar el dominio final.
+2. Confirmar el dominio final.
 
 ## 🔢 De dónde salen los tokens
 
