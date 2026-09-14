@@ -100,13 +100,23 @@ Reglas:
 
 ## 🖼️ El arte de las fichas
 
-El objeto `ART` tiene un SVG por proyecto, dibujado a mano en la paleta del sitio, que ilustra lo que hay adentro: `copiloto` (la onda de voz que entra y la respuesta que sale), `simulacro` (anillo de puntaje + los cinco indicadores del informe), `lorito` (avión de papel con estela y reloj), `fitness` (figura con landmarks de pose y alas, sobre los carriles), `eday` (radar chart + heatmap del fact checking), `astra` (bloques de transformers con líneas de atención) y `loro` (órbitas, quedó sin usar al separar los productos, sirve si vuelve una ficha paraguas). Todos usan `viewBox="0 0 200 125"` (16:10, igual que `.art`) y `preserveAspectRatio="xMidYMid meet"`: así llenan exacto la ficha en desktop y se ven enteros, sin recorte, en el thumbnail cuadrado de mobile. El fondo de `.art` y `.ov-art` es plano `#FFFDF8` para que el encuadre nunca se note.
+El objeto `ART` tiene un SVG por proyecto, dibujado a mano en la paleta del sitio. **Todos tienen movimiento propio, y el movimiento cuenta lo que el producto hace** — no es decoración:
+
+| Clave | Qué muestra | Qué se mueve |
+|---|---|---|
+| `copiloto` | la onda de voz que entra y la respuesta que sale | la onda vibra, la flecha fluye y los bullets de la respuesta aparecen de a uno |
+| `simulacro` | anillo de puntaje + los cinco indicadores | el anillo se dibuja, el tilde se traza y las barras crecen: el informe armándose |
+| `lorito` | el ave y el reloj | el ave recorre la estela con `offset-path`, la estela corre y la aguja gira |
+| `fitness` | figura con landmarks de pose | las alas aletean, el cuerpo rebota y los carriles se vienen encima |
+| `eday` | radar chart + heatmap del fact checking | el radar se deforma con el pitch y el heatmap se va pintando bloque a bloque |
+| `astra` | bloques de transformers | la atención corre entre los dos stacks y los bloques laten | Todos usan `viewBox="0 0 200 125"` (16:10, igual que `.art`) y `preserveAspectRatio="xMidYMid meet"`: así llenan exacto la ficha en desktop y se ven enteros, sin recorte, en el thumbnail cuadrado de mobile. El fondo de `.art` y `.ov-art` es plano `#FFFDF8` para que el encuadre nunca se note.
 
 **Para poner una captura real** en lugar del SVG: dejar el archivo en `assets/` y agregarle `imagen: '/assets/loquesea.webp'` al proyecto. El SVG queda como fallback si algún día se saca la imagen.
 
 ⚠️ Dos trampas al dibujar el arte:
 
-- Los `<style>` dentro de un SVG aplican a **todo el documento**, no solo a ese SVG. Por eso las clases del arte van con prefijo (`art-spin`, `art-pulse`). No usar nombres genéricos ahí adentro.
+- Los `<style>` dentro de un SVG aplican a **todo el documento**, no solo a ese SVG. Por eso cada arte lleva su propio prefijo (`cop-`, `sim-`, `lor-`, `fit-`, `ed-`, `as-`). Dos artes con la misma clase se pisan entre sí.
+- Cada arte apaga sus animaciones con su propio bloque `@media(prefers-reduced-motion:reduce)` adentro del SVG. Verificado: con la preferencia activada las seis quedan quietas.
 - No poner `transform-box` / `transform-origin` en un elemento que ya trae un `transform="rotate(a cx cy)"` como atributo: el origen se aplica encima del que declara el rotate y el elemento se dibuja corrido. Solo hacen falta cuando la animación misma escala o rota, y el elemento no tiene transform propio.
 
 ## 🎨 Sistema de diseño
@@ -136,9 +146,23 @@ La nota del Mom Test usa `assets/mom.png`. El original que subió Axel (`mom.jpg
 
 **Si no carga ninguna, el `onerror` del `<img>` muestra un dibujo propio de matraces** (inline en el HTML, clase `.meme-fb`) y la página no se ve rota. Es material de Cartoon Network / Warner: uso de meme, decisión de Axel.
 
-### Subrayado del H1
+### Subrayado y resaltado del H1
 
-Está **portado tal cual del hero de `a13i-accelerator`**, que no usa rough-notation sino **roughjs directo** (`https://unpkg.com/roughjs@4.6.6/bundled/rough.js`, pinneada): dos pasadas de línea (ida y vuelta) sobre cada rect del texto, con `strokeWidth 2.5`, `roughness 1.3`, `bowing 1.2`, `disableMultiStroke`. Eso es lo que le da el trazo dibujado a mano; rough-notation con parámetros parecidos queda bastante peor. Se dibuja después de `document.fonts.ready` (si no, queda desalineado) y se redibuja en cada `resize` y después de cada `fit()`. Si el CDN no carga, no pasa nada: el texto queda legible sin la decoración.
+Los dos están **portados del hero de `a13i-accelerator`**, que no usa rough-notation sino **roughjs directo** (`https://unpkg.com/roughjs@4.6.6/bundled/rough.js`, pinneada). Eso es lo que da el trazo dibujado a mano; rough-notation con parámetros parecidos queda bastante peor.
+
+Se marcan en el HTML con `data-hl="underline"` o `data-hl="highlight"` más `data-hl-color`. Hoy: subrayado en "científico loco" (`#D4612A`) y resaltado en "el de Dexter" (`rgba(225,94,63,0.22)`). Para mover el efecto, se cambia de span — el JS toma todos los `[data-hl]` que encuentre.
+
+- **Subrayado:** dos pasadas de línea, ida y vuelta.
+- **Resaltado:** una sola línea del grosor del renglón (`r.height * 0.88`), `roughness 2.4`, dibujada en un SVG insertado **antes** del span para que quede detrás del texto.
+
+Dos ajustes propios sobre la versión de accelerator, los dos por una razón concreta:
+
+- El subrayado se dibuja a `r.height * 0.87`, en la zona del descendente, **no al pie de la caja del span**. Con `line-height` ajustado esa caja ya invade la línea de abajo — medido en mobile: el pie del span quedaba 2,4px por debajo del techo del renglón siguiente — y el trazo terminaba encima del texto.
+- El grosor y el temblor acompañan al `font-size` (`strokeWidth` entre 1.5 y 2.5, `bowing` 0.7 abajo de 28px). Los valores fijos de accelerator son para un título de 50px; a los 23px de mobile quedan gruesos y se van de línea.
+
+Se dibuja después de `document.fonts.ready` (si no, queda desalineado) y se redibuja en cada `resize` y después de cada `fit()`. Si el CDN no carga, no pasa nada: el texto queda legible sin la decoración.
+
+**Para verlo en local:** unpkg puede estar bloqueado según el entorno. `npm pack roughjs@4.6.6`, sacar `package/bundled/rough.js` y apuntar el `<script>` ahí.
 
 ## ⚙️ Convenciones
 
