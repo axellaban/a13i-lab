@@ -30,6 +30,8 @@ título + bajada   |   meme        ← dos columnas en desktop, apiladas en mobi
 [ 01 ] [ 02 ] [ 03 ] [ 04 ] [ 05 ]      ← grilla portfolio
 ```
 
+Cada ficha es **arte + una sola frase**. Nada más: ni número, ni etiqueta, ni "ver el detalle" — repetidos seis veces no agregaban información. La única pista de que se abre es un `+` que aparece al pasar por encima (`.plus`, oculto en mobile).
+
 La grilla es `repeat(auto-fit, minmax(12em, 1fr))`: reparte sola las fichas que haya, sin dejar huecos en la última fila. Con hasta 5 entran todas en una fila; a partir de ahí arma dos.
 
 Al tocar una ficha se abre un modal centrado (`.overlay`, colgado del `<body>`) con el arte a la izquierda y el detalle a la derecha, sobre un fondo oscurecido (`.backdrop`). Mide `min(1080px, 92vw) × min(660px, 82vh)`; en mobile pasa a pantalla completa. Se cierra con la ✕, con Escape o tocando afuera.
@@ -53,9 +55,9 @@ Todo sale del array `PROYECTOS` en el `<script>` de `index.html`. Es la única f
 
 ```js
 {
-  titulo:  'Copiloto de Entrevistas con IA',      // obligatorio
-  familia: 'Universo Loro',                       // opcional — etiqueta arriba del título
-  tagline: 'La línea que se ve con la ficha cerrada.',  // obligatorio
+  titulo:  'Copiloto de Entrevistas',             // obligatorio — se ve solo en el detalle
+  pitch:   'Te sopla qué responder mientras te hacen una entrevista.',  // obligatorio
+  familia: 'Universo Loro',                       // opcional — etiqueta, solo en el detalle
   lead:    'Primera línea del detalle.',          // opcional
   items: [                                        // opcional — sub-productos o versiones
     { n: 'Nombre', d: 'Qué es, en una línea.' },
@@ -68,8 +70,9 @@ Todo sale del array `PROYECTOS` en el `<script>` de `index.html`. Es la única f
 ```
 
 Reglas:
+- **`pitch` es lo único que se lee en la ficha cerrada.** Una sola frase de 8 a 10 palabras que se explique sola, sin jerga: tiene que pasar el Mom Test — si tu vieja la lee y entiende de qué va, sirve. El nombre del proyecto, la familia y el detalle aparecen recién al abrirla; en la ficha redundaban seis veces y no sumaban nada.
 - `items` admite `n`, `d` y `bullets`. Se pueden combinar o usar sueltos.
-- `familia` agrupa productos que son parte de algo más grande sin necesidad de una ficha paraguas: los tres productos del Universo Loro tienen ficha propia y comparten esa etiqueta.
+- `familia` agrupa productos que son parte de algo más grande sin necesidad de una ficha paraguas: los cuatro productos del Universo Loro tienen ficha propia y comparten esa etiqueta, que se ve en el detalle.
 - El label del link se deriva de la URL (se le saca el protocolo y la barra final).
 - Todo el contenido pasa por `esc()` antes de entrar al DOM. No romper eso al agregar campos.
 
@@ -98,13 +101,13 @@ Mismos tokens que `a13i-accelerator`. Tokens en `:root`, nunca hardcodear hex.
 - **Tipografía:** `Geist` para el texto, `Geist Mono` para numeración, chrome y URLs, `Space Grotesk` 700 solo para el wordmark.
 - **Wordmark:** `A13I_LAB` con `13` y `_` en naranja y `LAB` en itálica — mismo patrón que `A13I_ACCELERATOR`.
 - **Fondo:** textura de ruido SVG al 1.5% + un radial cálido arriba a la izquierda.
-- **Fichas:** blancas, radio `1.15em`, borde `--border-2`, hover con `translateY(-3px)` y un leve zoom del arte.
+- **Fichas:** blancas, radio `1.15em`, borde `--border-2`, hover con `translateY(-3px)`, un leve zoom del arte y el `+` que aparece en la esquina.
 
 ### El meme
 
 El encabezado tiene un recuadro con un GIF del laboratorio de Dexter. La fuente sale de la constante `MEME_SRC`, arriba del script, y acepta las dos formas:
 
-- un archivo del repo: `'/assets/dexter-lab.gif'` (el default)
+- un archivo del repo: `'/assets/exploding-chemicals-dexter.gif'` (el que está hoy, 220×165, justo la proporción 4:3 del recuadro)
 - una URL directa a un gif externo: `'https://media.giphy.com/media/xxxx/giphy.gif'`
 
 **Si no carga ninguna, el `onerror` del `<img>` muestra un dibujo propio de matraces** (inline en el HTML, clase `.meme-fb`) y la página no se ve rota. Es material de Cartoon Network / Warner: uso de meme, decisión de Axel.
@@ -140,8 +143,7 @@ Push a `main` → auto-deploy en Vercel.
 
 1. Capturas reales de los tres proyectos, para reemplazar el arte generado (campo `imagen`).
 2. `og:image` propio del lab (hoy reusa el genérico de accelerator).
-3. El GIF: dejar `assets/dexter-lab.gif` en el repo o apuntar `MEME_SRC` a una URL externa (hoy cae en el dibujo de fallback).
-4. Confirmar el dominio final.
+3. Confirmar el dominio final.
 
 ## 📚 De dónde salen las descripciones
 

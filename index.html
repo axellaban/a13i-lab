@@ -155,10 +155,7 @@
   .art-inner svg, .art-inner img{ width:100%; height:100%; display:block; object-fit:cover; }
 
   .body{ display:flex; flex-direction:column; flex:1; padding:1.05em 1.15em 1.15em; }
-  .meta{ display:flex; align-items:center; gap:.7em; margin-bottom:.5em; }
-  .meta::after{
-    content:''; flex:1; height:1px; background:var(--border);
-  }
+  .meta{ display:flex; align-items:center; gap:.7em; }
   .num{
     font-family:var(--mono); font-size:.7em; font-weight:600;
     letter-spacing:.16em; color:var(--faint); flex-shrink:0;
@@ -172,21 +169,25 @@
     content:''; width:.45em; height:.45em; border-radius:50%;
     background:var(--accent); flex-shrink:0;
   }
-  .h2{ display:block; font-size:1.16em; font-weight:800; letter-spacing:-.03em; line-height:1.18; }
-  .tagline{ display:block; font-size:.87em; line-height:1.45; color:var(--muted); margin-top:.45em; }
-  .more{
-    display:inline-flex; align-items:center; gap:.5em;
-    margin-top:auto; padding-top:1em; align-self:flex-start;
-    font-family:var(--mono); font-size:.72em; font-weight:600;
-    letter-spacing:.1em; text-transform:uppercase; color:var(--accent);
+  /* Unica linea de la ficha: una frase de 8 a 10 palabras que se explica sola.
+     El nombre del proyecto aparece recien al abrir el detalle. */
+  .pitch{
+    display:block; font-size:1.02em; font-weight:700;
+    letter-spacing:-.022em; line-height:1.32; color:var(--text);
   }
-  .more .pl{
-    width:1.55em; height:1.55em; border-radius:.45em; flex-shrink:0;
+
+  /* Unica pista de que la ficha se abre: aparece al pasar por encima.
+     Un texto por ficha se repetia seis veces y no sumaba nada. */
+  .plus{
+    position:absolute; top:.55em; right:.55em; z-index:2;
+    width:1.9em; height:1.9em; border-radius:50%;
     display:inline-flex; align-items:center; justify-content:center;
-    background:rgba(212,97,42,.12); font-size:1.15em; line-height:1;
-    transition:background .18s, transform .28s;
+    background:rgba(254,251,242,.94); border:1px solid var(--border-2);
+    color:var(--accent); font-size:1em; font-weight:600; line-height:1;
+    opacity:0; transform:scale(.8);
+    transition:opacity .2s ease, transform .2s cubic-bezier(.22,1,.36,1);
   }
-  .card:hover .more .pl{ background:rgba(212,97,42,.22); }
+  .card:hover .plus, .face:focus-visible .plus{ opacity:1; transform:scale(1); }
 
   /* ── DETALLE: panel sobre toda la grilla ─────────────────────── */
   .backdrop{
@@ -273,8 +274,8 @@
       aspect-ratio:1/1; flex:0 0 26%; max-width:6.6em;
       border-bottom:0; border-right:1px solid var(--border);
     }
-    .body{ padding:.8em .9em; }
-    .more{ padding-top:.55em; }
+    .body{ padding:.8em .9em; justify-content:center; }
+    .plus{ display:none; }
     /* En pantalla chica el detalle ocupa toda la pantalla */
     .overlay{
       top:0; left:0; width:100%; height:100%;
@@ -310,7 +311,7 @@
         <!-- El GIF va en assets/dexter-lab.gif. Si no esta, cae solo en el
              dibujo de abajo y la pagina no se ve rota. -->
         <figure class="meme" id="meme">
-          <img src="/assets/dexter-lab.gif" alt="El laboratorio de Dexter" id="memeImg">
+          <img src="/assets/exploding-chemicals-dexter.gif" alt="El laboratorio de Dexter" id="memeImg">
           <svg class="meme-fb" viewBox="0 0 200 150" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
             <style>
               .bub{ animation:bub 2.6s ease-in-out infinite; }
@@ -564,8 +565,9 @@ const ART = {
    Para agregar uno, suma un objeto a este array.
 
    {
-     titulo:  string    obligatorio
-     tagline: string    obligatorio — la linea que se ve con la ficha cerrada
+     titulo:  string    obligatorio — el nombre, se ve solo en el detalle
+     pitch:   string    obligatorio — LA linea de la ficha: 8 a 10 palabras
+                        que expliquen solas de que se trata, sin jerga
      lead:    string    opcional — primera linea del detalle
      items:   [{ n, d, bullets[] }]   opcional — sub-productos o versiones
      link:    string    opcional
@@ -577,7 +579,7 @@ const PROYECTOS = [
   {
     titulo: 'Copiloto de Entrevistas',
     familia: 'Universo Loro',
-    tagline: 'Te sopla la respuesta mientras te están entrevistando, en un segundo y pico.',
+    pitch: 'Te sopla qué responder mientras te hacen una entrevista.',
     art: 'copiloto',
     lead: 'Asistente de respuestas en tiempo real para entrevistas, discovery calls y reuniones: escucha lo que te preguntan y te tira la respuesta en pantalla, anclada a tu perfil.',
     items: [
@@ -594,7 +596,7 @@ const PROYECTOS = [
   {
     titulo: 'Simulacro de Entrevistas',
     familia: 'Universo Loro',
-    tagline: 'Una entrevista hablada con IA que te repregunta, y un informe crudo al terminar.',
+    pitch: 'Practicás una entrevista con una IA y te corrige después.',
     art: 'simulacro',
     lead: 'Entrevista simulada con un entrevistador de IA que te ve, te escucha y te aprieta. Al final te arma el informe.',
     items: [
@@ -611,7 +613,7 @@ const PROYECTOS = [
   {
     titulo: 'Envía un Lorito',
     familia: 'Universo Loro',
-    tagline: 'Nueva red social, lenta e inútil. El mensaje vuela de verdad y tarda lo que tiene que tardar.',
+    pitch: 'Mandás un mensaje y un pájaro lo lleva volando, lento.',
     art: 'lorito',
     lead: 'El ave despega desde tu ubicación real y hasta que no aterriza en el nido de la otra persona, el mensaje no existe del otro lado.',
     items: [
@@ -629,7 +631,7 @@ const PROYECTOS = [
   {
     titulo: 'Loro Run',
     familia: 'Universo Loro',
-    tagline: 'Un runner en 3D que se juega con el cuerpo, leído desde la cámara del navegador.',
+    pitch: 'Jugás moviendo el cuerpo: la cámara te lee los movimientos.',
     art: 'fitness',
     lead: 'Runner en primera persona: la carrera avanza sola y vos seguís al guacamayo por el templo de las alas moviendo el cuerpo.',
     items: [
@@ -641,7 +643,7 @@ const PROYECTOS = [
   },
   {
     titulo: 'Dashboard eCommerce Day 2026',
-    tagline: 'Tablero de jurado del Demo Day, en dos versiones: Human Judge y AI Judge.',
+    pitch: 'Una IA escucha a quien presenta y lo puntúa.',
     art: 'eday',
     items: [
       { n: 'Human Judge', d: 'Los jurados puntuaban a cada equipo por criterio de cada competición en un formulario, y eso se reflejaba en el tablero: indicadores, radar chart y podio. 🏎️🏆' },
@@ -657,7 +659,7 @@ const PROYECTOS = [
   },
   {
     titulo: 'Astra 6',
-    tagline: 'Render 3D: DeepSeek v4.1 Flash contra los transformers de 2018.',
+    pitch: 'En 3D: cómo cambió la IA por dentro desde 2018.',
     art: 'astra',
     lead: 'Render 3D que compara el paper de DeepSeek v4.1 Flash con el modelo origen de los transformers de 2018.',
     link: 'https://transformer-architecture.vercel.app/'
@@ -687,16 +689,11 @@ function cardHTML(p, i){
 
   return '<article class="card">' +
     '<button class="face" type="button" aria-expanded="false" aria-controls="ov" data-i="' + i + '">' +
-      '<span class="art"><span class="art-inner">' + art + '</span></span>' +
-      '<span class="body">' +
-        '<span class="meta">' +
-          '<span class="num">' + String(i + 1).padStart(2, '0') + '</span>' +
-          (p.familia ? '<span class="familia">' + esc(p.familia) + '</span>' : '') +
-        '</span>' +
-        '<span class="h2">' + esc(p.titulo) + '</span>' +
-        '<span class="tagline">' + esc(p.tagline) + '</span>' +
-        '<span class="more"><span class="pl" aria-hidden="true">+</span>Ver el detalle</span>' +
+      '<span class="art">' +
+        '<span class="art-inner">' + art + '</span>' +
+        '<span class="plus" aria-hidden="true">+</span>' +
       '</span>' +
+      '<span class="body"><span class="pitch">' + esc(p.pitch) + '</span></span>' +
     '</button>' +
   '</article>';
 }
@@ -732,7 +729,7 @@ function overlayHTML(p, i){
    EL MEME — el gif del laboratorio de Dexter.
    Dos formas de ponerlo, cualquiera de las dos sirve:
 
-   1. Dejar el archivo en el repo:  assets/dexter-lab.gif
+   1. Dejar el archivo en el repo:  assets/loquesea.gif
    2. Pegar acá la URL directa del gif (Giphy, Tenor, donde sea).
       Tiene que terminar en .gif y ser el archivo, no la pagina:
       'https://media.giphy.com/media/xxxxx/giphy.gif'
@@ -740,7 +737,7 @@ function overlayHTML(p, i){
    Si no carga ninguna de las dos, la ficha muestra el dibujo de
    matraces y la pagina no se ve rota.
    ═══════════════════════════════════════════════════════════════ */
-const MEME_SRC = '/assets/dexter-lab.gif';
+const MEME_SRC = '/assets/exploding-chemicals-dexter.gif';
 
 (function(){
   const fig = document.getElementById('meme');
