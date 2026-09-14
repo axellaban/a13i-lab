@@ -21,7 +21,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
-<script src="https://unpkg.com/rough-notation@0.5.1/lib/rough-notation.iife.js"></script>
+<!-- roughjs: mismo motor y misma version que el subrayado del hero de a13i-accelerator -->
+<script src="https://unpkg.com/roughjs@4.6.6/bundled/rough.js"></script>
 
 <!-- Google tag (gtag.js) — misma propiedad que accelerator/partner -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-FV5WCTFBC3"></script>
@@ -36,6 +37,8 @@
   :root{
     /* Paleta: idéntica a a13i-accelerator / a13i-partner */
     --bg:          #FEFBF2;
+    --card:        #FFFFFF;
+    --card-2:      #FDFAF3;
     --border:      #E8E3DE;
     --border-2:    #EAD9C8;
     --text:        #1A1410;
@@ -44,24 +47,24 @@
     --accent:      #D4612A;
     --accent-2:    #E15E3F;
     --accent-deep: #A04510;
+    --green:       #1E8E5A;
+    --amber:       #B5790A;
 
     --sans: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
     --mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 
-    --maxw: 760px;
+    /* Factor de ajuste: lo baja fit() si el contenido no entra en la pantalla.
+       Todo el layout esta en em, asi que con esto escala la pagina entera. */
+    --s: 1;
   }
 
   *{ box-sizing:border-box; margin:0; padding:0; }
   html{ -webkit-font-smoothing:antialiased; }
   body{
-    background:var(--bg);
-    color:var(--text);
-    font-family:var(--sans);
-    line-height:1.6;
-    min-height:100vh;
-    overflow-x:hidden;
+    background:var(--bg); color:var(--text);
+    font-family:var(--sans); line-height:1.55;
+    overflow:hidden;
   }
-  /* Textura de papel + halo cálido: mismo tratamiento que el resto de los sitios */
   body::before{
     content:''; position:fixed; inset:0; z-index:100;
     background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
@@ -73,168 +76,344 @@
   }
 
   a{ color:inherit; text-decoration:none; }
+  button{ font:inherit; color:inherit; background:none; border:0; cursor:pointer; }
   ::selection{ background:rgba(212,97,42,.22); }
-  :focus-visible{ outline:2px solid var(--accent); outline-offset:4px; border-radius:6px; }
+  :focus-visible{ outline:2px solid var(--accent); outline-offset:3px; border-radius:6px; }
 
-  .page{
+  /* ── PANTALLA UNICA ──────────────────────────────────────────── */
+  .screen{
     position:relative; z-index:2;
-    width:100%; max-width:var(--maxw); margin:0 auto;
-    padding:clamp(44px,8vh,88px) clamp(20px,5vw,32px) clamp(72px,12vh,128px);
+    height:100vh; height:100dvh; overflow:hidden;
+    font-size:calc(clamp(10.5px, min(3.1vw, 1.78vh), 17px) * var(--s));
+    padding:2.4em clamp(20px,4vw,48px) 2.4em;
+    display:flex; align-items:center;
   }
+  .inner{ width:100%; max-width:calc(74em + 6vw); margin:0 auto; }
 
-  /* ── LOGO ────────────────────────────────────────────────────── */
+  /* ── ENCABEZADO ──────────────────────────────────────────────── */
   .logo{
     font-family:'Space Grotesk','Arial',sans-serif;
-    font-weight:700; font-size:23px; letter-spacing:-.3px; line-height:1;
-    color:#111; white-space:nowrap; display:inline-block;
-    margin-bottom:clamp(48px,9vh,88px);
+    font-weight:700; font-size:1.5em; letter-spacing:-.02em; line-height:1;
+    color:#111; white-space:nowrap; display:inline-block; margin-bottom:1.9em;
   }
   .logo .o{ color:#D44B2A; }
   .logo .it{ font-style:italic; font-size:.92em; }
-  @media(max-width:600px){ .logo{ font-size:19px; margin-bottom:40px; } }
 
-  /* ── TÍTULO ──────────────────────────────────────────────────── */
+  .head{
+    display:grid; grid-template-columns:minmax(0,1.12fr) minmax(0,.88fr);
+    gap:1.4em 3.2em; align-items:end;
+  }
   h1{
-    font-size:clamp(1.9rem,4.6vw,3.1rem);
-    font-weight:700; line-height:1.08; letter-spacing:-.035em;
-    margin-bottom:18px; max-width:15ch;
+    font-size:min(2.9em, 8.4vw);
+    font-weight:700; line-height:1.07; letter-spacing:-.035em;
   }
   h1 .paren{ color:var(--muted); font-weight:500; white-space:nowrap; }
-  .sub{
-    font-size:clamp(15px,1.8vw,17px); line-height:1.6; color:var(--muted);
-    max-width:56ch;
-  }
-  @media(max-width:600px){ h1{ max-width:100%; } }
+  .sub{ font-size:1.02em; line-height:1.55; color:var(--muted); padding-bottom:.35em; }
 
-  /* ── PROYECTOS ───────────────────────────────────────────────── */
-  .list{ margin-top:clamp(56px,10vh,104px); }
-
-  .entry{
-    display:grid; grid-template-columns:48px 1fr; gap:0 20px;
-    padding:clamp(28px,4vh,40px) 0;
-    border-top:1px solid var(--border);
-    transition:opacity .2s;
+  /* ── GRILLA PORTFOLIO ────────────────────────────────────────── */
+  .grid{
+    position:relative;
+    margin-top:2.2em;
+    display:grid; grid-template-columns:repeat(3,1fr); gap:1.4em;
   }
-  .entry:last-child{ border-bottom:1px solid var(--border); }
+  .card{
+    position:relative; overflow:hidden; isolation:isolate; display:flex;
+    background:var(--card); border:1px solid var(--border-2); border-radius:1.15em;
+    box-shadow:0 2px 12px rgba(31,20,16,.05);
+    transition:transform .24s cubic-bezier(.22,1,.36,1), box-shadow .24s, border-color .24s;
+  }
+  .card:hover{ transform:translateY(-3px); box-shadow:0 14px 34px rgba(31,20,16,.11); border-color:rgba(212,97,42,.32); }
+  .card:hover .art-inner{ transform:scale(1.04); }
+  .face{
+    display:flex; flex-direction:column; flex:1; width:100%;
+    text-align:left; padding:0; border-radius:inherit; overflow:hidden;
+  }
+
+  .art{
+    display:block; position:relative; overflow:hidden;
+    aspect-ratio:16/10; border-bottom:1px solid var(--border);
+    background:#FFFDF8;
+  }
+  .art-inner{ position:absolute; inset:0; transition:transform .5s cubic-bezier(.22,1,.36,1); }
+  .art-inner svg, .art-inner img{ width:100%; height:100%; display:block; object-fit:cover; }
+
+  .body{ display:flex; flex-direction:column; flex:1; padding:1.05em 1.15em 1.15em; }
   .num{
-    font-family:var(--mono); font-size:11px; font-weight:600;
-    letter-spacing:.14em; color:var(--faint); padding-top:6px;
+    display:block; font-family:var(--mono); font-size:.7em; font-weight:600;
+    letter-spacing:.16em; color:var(--faint); margin-bottom:.5em;
   }
-  a.entry:hover .num{ color:var(--accent); }
-  .entry h2{
-    font-size:clamp(1.2rem,2.3vw,1.6rem); font-weight:800;
-    letter-spacing:-.03em; line-height:1.2;
-    transition:color .18s;
+  .h2{ display:block; font-size:1.16em; font-weight:800; letter-spacing:-.03em; line-height:1.18; }
+  .tagline{ display:block; font-size:.87em; line-height:1.45; color:var(--muted); margin-top:.45em; }
+  .more{
+    display:inline-flex; align-items:center; gap:.5em; margin-top:1em;
+    font-family:var(--mono); font-size:.72em; font-weight:600;
+    letter-spacing:.1em; text-transform:uppercase; color:var(--accent);
   }
-  a.entry:hover h2{ color:var(--accent); }
-  .entry .lead{
-    font-size:14.5px; line-height:1.6; color:var(--muted);
-    margin-top:8px; max-width:60ch;
+  .more .pl{
+    width:1.55em; height:1.55em; border-radius:.45em; flex-shrink:0;
+    display:inline-flex; align-items:center; justify-content:center;
+    background:rgba(212,97,42,.12); font-size:1.15em; line-height:1;
+    transition:background .18s, transform .28s;
   }
+  .card:hover .more .pl{ background:rgba(212,97,42,.22); }
 
-  .items{ list-style:none; margin-top:20px; display:flex; flex-direction:column; gap:16px; }
-  .items > li{ padding-left:15px; border-left:2px solid var(--border-2); }
-  .items .n{ display:block; font-size:14px; font-weight:700; letter-spacing:-.01em; color:var(--text); }
-  .items .d{ display:block; font-size:13.5px; line-height:1.55; color:var(--muted); margin-top:3px; max-width:58ch; }
+  /* ── DETALLE: panel sobre toda la grilla ─────────────────────── */
+  .overlay{
+    position:absolute; inset:0; z-index:5;
+    display:grid; grid-template-columns:36% 1fr;
+    background:var(--card); border:1px solid rgba(212,97,42,.35); border-radius:1.15em;
+    box-shadow:0 18px 50px rgba(31,20,16,.16); overflow:hidden;
+    font-size:calc(1em * var(--so, 1));
+    opacity:0; transform:scale(.985); pointer-events:none; visibility:hidden;
+    transition:opacity .26s ease, transform .26s cubic-bezier(.22,1,.36,1), visibility 0s linear .26s;
+  }
+  .overlay.is-on{ opacity:1; transform:none; pointer-events:auto; visibility:visible; transition-delay:0s; }
 
-  .bullets{ list-style:none; margin-top:8px; display:flex; flex-direction:column; gap:6px; }
+  .ov-art{
+    position:relative; overflow:hidden;
+    border-right:1px solid var(--border);
+    /* plano y del mismo tono que el fondo de los SVG: asi no se ve el borde
+       del arte cuando entra entero en un contenedor mas angosto */
+    background:#FFFDF8;
+  }
+  .ov-art svg, .ov-art img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+
+  .ov-body{ display:flex; flex-direction:column; min-width:0; overflow:hidden; padding:1.5em 1.6em 1.4em; }
+  .ov-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:1em; }
+  .ov-num{
+    display:block; font-family:var(--mono); font-size:.7em; font-weight:600;
+    letter-spacing:.16em; color:var(--faint); margin-bottom:.45em;
+  }
+  .overlay h3{ font-size:1.5em; font-weight:800; letter-spacing:-.035em; line-height:1.15; }
+  .close{
+    width:2em; height:2em; border-radius:.55em; flex-shrink:0;
+    display:inline-flex; align-items:center; justify-content:center;
+    background:rgba(26,20,16,.06); color:var(--muted); font-size:.95em; line-height:1;
+    transition:background .16s, color .16s;
+  }
+  .close:hover{ background:rgba(212,97,42,.14); color:var(--accent); }
+  .overlay .lead{ font-size:.92em; line-height:1.5; color:var(--muted); margin-top:.7em; max-width:62ch; }
+
+  .items{ list-style:none; margin-top:1.1em; display:flex; flex-direction:column; gap:.85em; }
+  .items > li{ padding-left:.9em; border-left:2px solid var(--border-2); }
+  .items .n{ display:block; font-size:.92em; font-weight:700; letter-spacing:-.015em; color:var(--text); }
+  .items .d{ display:block; font-size:.88em; line-height:1.45; color:var(--muted); margin-top:.12em; max-width:64ch; }
+  .bullets{ list-style:none; margin-top:.45em; display:flex; flex-direction:column; gap:.35em; }
   .bullets li{
-    position:relative; padding-left:16px;
-    font-size:13.5px; line-height:1.55; color:var(--muted); max-width:58ch;
+    position:relative; padding-left:1.05em;
+    font-size:.88em; line-height:1.45; color:var(--muted); max-width:64ch;
   }
   .bullets li::before{
-    content:''; position:absolute; left:0; top:8px;
-    width:5px; height:5px; border-radius:50%; background:var(--accent); opacity:.55;
+    content:''; position:absolute; left:0; top:.55em;
+    width:.36em; height:.36em; border-radius:50%; background:var(--accent); opacity:.6;
   }
-
-  .url{
-    display:inline-flex; align-items:center; gap:7px; margin-top:22px;
-    font-family:var(--mono); font-size:12px; font-weight:500; letter-spacing:.01em;
-    color:var(--accent-deep); word-break:break-all;
+  .visit{
+    display:inline-flex; align-items:center; gap:.6em; align-self:flex-start;
+    margin-top:auto; padding-top:1.2em;
+    font-family:var(--mono); font-size:.8em; font-weight:600;
+    color:var(--accent-deep); overflow-wrap:anywhere;
   }
-  .url .ar{ flex-shrink:0; transition:transform .18s; }
-  a.entry:hover .url{ color:var(--accent); }
-  a.entry:hover .url .ar{ transform:translate(2px,-2px); }
+  .visit:hover{ color:var(--accent); }
+  .visit .ar{ flex-shrink:0; transition:transform .18s; }
+  .visit:hover .ar{ transform:translate(2px,-2px); }
 
-  @media(max-width:600px){
-    .entry{ grid-template-columns:1fr; gap:0; }
-    .num{ padding-top:0; margin-bottom:10px; }
-    .items > li{ padding-left:13px; }
+  /* ── MOBILE ──────────────────────────────────────────────────── */
+  @media(max-width:820px){
+    .screen{ padding:1.8em clamp(16px,5vw,28px); align-items:flex-start; }
+    .logo{ margin-bottom:1.3em; }
+    .head{ display:block; }
+    .sub{ margin-top:.8em; padding-bottom:0; }
+    .grid{ margin-top:1.5em; grid-template-columns:1fr; gap:.8em; }
+    .card{ border-radius:.9em; }
+    .card:hover{ transform:none; }
+    .face{ flex-direction:row; align-items:stretch; }
+    .art{
+      aspect-ratio:1/1; flex:0 0 26%; max-width:6.6em;
+      border-bottom:0; border-right:1px solid var(--border);
+    }
+    .body{ padding:.8em .9em; }
+    .more{ margin-top:.55em; }
+    /* En pantalla chica el detalle ocupa toda la pantalla */
+    .overlay{
+      position:fixed; inset:0; z-index:200; border-radius:0; border:0;
+      grid-template-columns:1fr; grid-template-rows:auto 1fr;
+      transform:translateY(1.5%);
+    }
+    .ov-art{ height:22vh; border-right:0; border-bottom:1px solid var(--border); }
+    .ov-body{ padding:1.4em 1.3em calc(1.3em + env(safe-area-inset-bottom)); overflow:auto; }
+    .overlay h3{ font-size:1.35em; }
   }
 
   @media(prefers-reduced-motion:reduce){
-    *,*::before,*::after{ animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; }
+    *,*::before,*::after{ animation:none !important; transition-duration:.001ms !important; }
+    .art-inner{ transform:none !important; }
   }
 </style>
 </head>
 <body>
 
-<div class="page">
+<div class="screen">
+  <div class="inner">
 
-  <span class="logo">A<span class="o">13</span>I<span class="o">_</span><span class="it">LAB</span></span>
+    <span class="logo">A<span class="o">13</span>I<span class="o">_</span><span class="it">LAB</span></span>
 
-  <h1>Laboratorio <span class="paren">(de Axel Laban)</span> impulsado por la <span id="hlCuriosidad">curiosidad</span></h1>
-  <p class="sub">experimentos, mvp funcionales y productos digitales, todo vibecoding con cabeza para aprender y divertirse.</p>
+    <div class="head">
+      <h1>Laboratorio <span class="paren">(de Axel Laban)</span> impulsado por la <span id="hlCuriosidad" data-hl="underline" data-hl-color="#D4612A">curiosidad</span></h1>
+      <p class="sub">experimentos, mvp funcionales y productos digitales, todo vibecoding con cabeza para aprender y divertirse.</p>
+    </div>
 
-  <div class="list" id="list"></div>
+    <div class="grid" id="grid"></div>
 
+  </div>
 </div>
 
 <script>
 /* ═══════════════════════════════════════════════════════════════
-   PROYECTOS — única fuente de verdad del listado.
-   Para agregar uno, sumá un objeto a este array. Se muestran en
-   este orden, numerados automáticamente.
+   ARTE DE CADA FICHA
+   SVG generado, en la paleta del sitio. Si un proyecto tiene el campo
+   `imagen` (ej: '/assets/loro.webp'), se usa esa captura en lugar del SVG.
+   ═══════════════════════════════════════════════════════════════ */
+const ART = {
+  /* Universo Loro: un nucleo con productos en orbita */
+  loro: `<svg viewBox="0 0 200 125" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+    <style>
+      .art-spin{ transform-origin:100px 62px; animation:art-spin 30s linear infinite; }
+      .art-spin-r{ transform-origin:100px 62px; animation:art-spin 44s linear infinite reverse; }
+      @keyframes art-spin{ to{ transform:rotate(360deg); } }
+      @media(prefers-reduced-motion:reduce){ .art-spin,.art-spin-r{ animation:none; } }
+    </style>
+    <defs><radialGradient id="lg" cx="50%" cy="48%" r="62%">
+      <stop offset="0%" stop-color="#F7E4D2"/><stop offset="100%" stop-color="#FFFDF8" stop-opacity="0"/>
+    </radialGradient></defs>
+    <rect width="200" height="125" fill="url(#lg)"/>
+    <g fill="none" stroke="#E2CDB4" stroke-width="1">
+      <ellipse cx="100" cy="62" rx="76" ry="31"/>
+      <ellipse cx="100" cy="62" rx="55" ry="49"/>
+      <ellipse cx="100" cy="62" rx="31" ry="31" stroke-dasharray="3 5"/>
+    </g>
+    <g class="art-spin">
+      <circle cx="176" cy="62" r="6.5" fill="#D4612A"/>
+      <circle cx="24" cy="62" r="4.5" fill="#1A1410" opacity=".8"/>
+    </g>
+    <g class="art-spin-r">
+      <circle cx="100" cy="13" r="5.5" fill="#E15E3F"/>
+      <circle cx="100" cy="111" r="4" fill="#B5790A" opacity=".85"/>
+    </g>
+    <circle cx="100" cy="62" r="13" fill="#1A1410"/>
+    <circle cx="100" cy="62" r="20" fill="none" stroke="#D4612A" stroke-opacity=".35" stroke-width="1.5"/>
+    <circle cx="104" cy="58.5" r="2.6" fill="#FEFBF2"/>
+  </svg>`,
+
+  /* eCommerce Day: radar chart + heatmap del fact checking sobre el transcript */
+  eday: `<svg viewBox="0 0 200 125" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+    <style>
+      .art-pulse{ transform-origin:62px 54px; animation:art-pulse 3.6s ease-in-out infinite; }
+      @keyframes art-pulse{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.06); } }
+      @media(prefers-reduced-motion:reduce){ .art-pulse{ animation:none; } }
+    </style>
+    <rect width="200" height="125" fill="#FFFDF8"/>
+    <g fill="none" stroke="#E2CDB4" stroke-width="1">
+      <polygon points="62,16 98,42 84,84 40,84 26,42"/>
+      <polygon points="62,35 80,48 73,69 51,69 44,48"/>
+    </g>
+    <g stroke="#EAD9C8" stroke-width=".8">
+      <line x1="62" y1="54" x2="62" y2="16"/><line x1="62" y1="54" x2="98" y2="42"/>
+      <line x1="62" y1="54" x2="84" y2="84"/><line x1="62" y1="54" x2="40" y2="84"/>
+      <line x1="62" y1="54" x2="26" y2="42"/>
+    </g>
+    <g class="art-pulse">
+      <polygon points="62,22 90,45 76,76 46,72 36,44" fill="#D4612A" fill-opacity=".18" stroke="#D4612A" stroke-width="1.6"/>
+      <g fill="#D4612A">
+        <circle cx="62" cy="22" r="2.6"/><circle cx="90" cy="45" r="2.6"/><circle cx="76" cy="76" r="2.6"/>
+        <circle cx="46" cy="72" r="2.6"/><circle cx="36" cy="44" r="2.6"/>
+      </g>
+    </g>
+    <g stroke="#E2CDB4" stroke-width="2.4" stroke-linecap="round">
+      <line x1="120" y1="22" x2="184" y2="22"/><line x1="120" y1="31" x2="170" y2="31"/>
+      <line x1="120" y1="40" x2="178" y2="40"/><line x1="120" y1="49" x2="156" y2="49"/>
+    </g>
+    <g>
+      <rect x="120" y="66" width="64" height="3" rx="1.5" fill="#EAD9C8"/>
+      <rect x="120" y="78" width="12" height="9" rx="2" fill="#1E8E5A" opacity=".85"/>
+      <rect x="135" y="78" width="18" height="9" rx="2" fill="#1E8E5A" opacity=".55"/>
+      <rect x="156" y="78" width="10" height="9" rx="2" fill="#B5790A" opacity=".8"/>
+      <rect x="169" y="78" width="15" height="9" rx="2" fill="#1E8E5A" opacity=".7"/>
+      <rect x="120" y="91" width="16" height="9" rx="2" fill="#D4612A" opacity=".75"/>
+      <rect x="139" y="91" width="22" height="9" rx="2" fill="#1E8E5A" opacity=".6"/>
+      <rect x="164" y="91" width="20" height="9" rx="2" fill="#B5790A" opacity=".6"/>
+    </g>
+  </svg>`,
+
+  /* Astra 6: dos stacks de bloques con las lineas de atencion entre medio */
+  astra: `<svg viewBox="0 0 200 125" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+    <rect width="200" height="125" fill="#FFFDF8"/>
+    <g stroke="#D4612A" stroke-width=".9" opacity=".45">
+      <line x1="74" y1="34" x2="126" y2="28"/><line x1="74" y1="34" x2="126" y2="56"/>
+      <line x1="74" y1="56" x2="126" y2="42"/><line x1="74" y1="56" x2="126" y2="84"/>
+      <line x1="74" y1="78" x2="126" y2="56"/><line x1="74" y1="78" x2="126" y2="98"/>
+      <line x1="74" y1="100" x2="126" y2="84"/>
+    </g>
+    <g transform="translate(26,14) skewY(8)">
+      <rect x="0" y="6" width="48" height="16" rx="3" fill="#FFFFFF" stroke="#E2CDB4"/>
+      <rect x="0" y="28" width="48" height="16" rx="3" fill="#FFFFFF" stroke="#E2CDB4"/>
+      <rect x="0" y="50" width="48" height="16" rx="3" fill="#FFFFFF" stroke="#E2CDB4"/>
+      <rect x="0" y="72" width="48" height="16" rx="3" fill="#F7F0E4" stroke="#E2CDB4"/>
+    </g>
+    <g transform="translate(126,14) skewY(-8)">
+      <rect x="0" y="6" width="48" height="16" rx="3" fill="#1A1410"/>
+      <rect x="0" y="28" width="48" height="16" rx="3" fill="#D4612A"/>
+      <rect x="0" y="50" width="48" height="16" rx="3" fill="#1A1410"/>
+      <rect x="0" y="72" width="48" height="16" rx="3" fill="#E15E3F" opacity=".85"/>
+    </g>
+  </svg>`
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   PROYECTOS — unica fuente de verdad del listado.
+   Para agregar uno, suma un objeto a este array.
 
    {
-     titulo: string      obligatorio
-     lead:   string      opcional — una o dos líneas de qué es
-     items:  [{ n, d, bullets[] }]   opcional — sub-productos o versiones
-     link:   string      opcional — si está, la entrada entera es clickeable
+     titulo:  string    obligatorio
+     tagline: string    obligatorio — la linea que se ve con la ficha cerrada
+     lead:    string    opcional — primera linea del detalle
+     items:   [{ n, d, bullets[] }]   opcional — sub-productos o versiones
+     link:    string    opcional
+     art:     clave de ART            arte generado de la ficha
+     imagen:  '/assets/x.webp'        opcional — si esta, reemplaza al arte
    }
    ═══════════════════════════════════════════════════════════════ */
 const PROYECTOS = [
   {
     titulo: 'Universo Loro',
+    tagline: 'Copiloto de Entrevistas, Envía un Lorito y Loro Fitness.',
+    art: 'loro',
     items: [
-      {
-        n: 'Copiloto de Entrevistas con IA',
-        d: 'El #1 de América Latina. Simulacro de entrevistas con IA y feedback al instante.'
-      },
-      {
-        n: 'Envía un Lorito',
-        d: 'Nueva red social, lenta e inútil. Mensajes que tardan.'
-      },
-      {
-        n: 'Loro Fitness',
-        d: 'El juego.'
-      }
+      { n: 'Copiloto de Entrevistas con IA', d: 'El #1 de América Latina. Simulacro de entrevistas con IA y feedback al instante.' },
+      { n: 'Envía un Lorito', d: 'Nueva red social, lenta e inútil. Mensajes que tardan.' },
+      { n: 'Loro Fitness', d: 'El juego.' }
     ],
     link: 'https://universo-loro.vercel.app/'
   },
   {
-    titulo: 'Dashboard eCommerce Day 2026 Argentina',
-    lead: 'Tablero de jurado del Demo Day, en dos versiones: Human Judge y AI Judge.',
+    titulo: 'Dashboard eCommerce Day 2026',
+    tagline: 'Tablero de jurado del Demo Day, en dos versiones: Human Judge y AI Judge.',
+    art: 'eday',
     items: [
-      {
-        n: 'Human Judge',
-        d: 'Los jurados humanos puntuaban a cada equipo por criterio de cada competición en un formulario, y eso se reflejaba en el tablero: indicadores, radar chart y podio. 🏎️🏆'
-      },
-      {
-        n: 'AI Judge',
-        bullets: [
-          'Transcript en tiempo real, con menos de 1 segundo de latencia.',
-          'Fact checking en vivo, con heatmap sobre el transcript: datos fundados, de dudosa procedencia y muy subjetivados.',
-          'Indicadores y radar chart moviéndose a medida que se desarrollaba el pitch.',
-          'Preguntas idóneas generadas en tiempo real para hacerle al presentador.',
-          'Al terminar cada pitch, la ficha completa: puntaje, fortalezas, debilidades y veredicto.'
-        ]
-      }
+      { n: 'Human Judge', d: 'Los jurados puntuaban a cada equipo por criterio de cada competición en un formulario, y eso se reflejaba en el tablero: indicadores, radar chart y podio. 🏎️🏆' },
+      { n: 'AI Judge', bullets: [
+        'Transcript en tiempo real, con menos de 1 segundo de latencia.',
+        'Fact checking en vivo, con heatmap sobre el transcript: datos fundados, de dudosa procedencia y muy subjetivados.',
+        'Indicadores y radar chart moviéndose a medida que se desarrollaba el pitch.',
+        'Preguntas idóneas generadas en tiempo real para hacerle al presentador.',
+        'Al terminar cada pitch, la ficha completa: puntaje, fortalezas, debilidades y veredicto.'
+      ]}
     ],
     link: 'https://eday-2026-argentina-demo-day.vercel.app/ai-unified-commerce'
   },
   {
     titulo: 'Astra 6',
+    tagline: 'Render 3D: DeepSeek v4.1 Flash contra los transformers de 2018.',
+    art: 'astra',
     lead: 'Render 3D que compara el paper de DeepSeek v4.1 Flash con el modelo origen de los transformers de 2018.',
     link: 'https://transformer-architecture.vercel.app/'
   }
@@ -248,8 +427,7 @@ const esc = (v) => String(v == null ? '' : v)
 const urlLabel = (u) => esc(String(u).replace(/^https?:\/\//, '').replace(/\/$/, ''));
 
 function itemHTML(it){
-  const bullets = (it.bullets || [])
-    .map(b => '<li>' + esc(b) + '</li>').join('');
+  const bullets = (it.bullets || []).map(b => '<li>' + esc(b) + '</li>').join('');
   return '<li>' +
     (it.n ? '<span class="n">' + esc(it.n) + '</span>' : '') +
     (it.d ? '<span class="d">' + esc(it.d) + '</span>' : '') +
@@ -257,37 +435,193 @@ function itemHTML(it){
   '</li>';
 }
 
-function entryHTML(p, i){
-  const clickable = !!p.link;
-  const tag = clickable ? 'a' : 'div';
-  const attrs = clickable ? ' href="' + esc(p.link) + '" target="_blank" rel="noopener"' : '';
-  const items = (p.items || []).map(itemHTML).join('');
+function cardHTML(p, i){
+  const art = p.imagen
+    ? '<img src="' + esc(p.imagen) + '" alt="" loading="lazy">'
+    : (ART[p.art] || '');
 
-  return '<' + tag + ' class="entry"' + attrs + '>' +
-    '<span class="num">' + String(i + 1).padStart(2, '0') + '</span>' +
-    '<div>' +
-      '<h2>' + esc(p.titulo) + '</h2>' +
-      (p.lead ? '<p class="lead">' + esc(p.lead) + '</p>' : '') +
-      (items ? '<ul class="items">' + items + '</ul>' : '') +
-      (clickable
-        ? '<span class="url">' + urlLabel(p.link) + '<span class="ar" aria-hidden="true">&#8599;</span></span>'
-        : '') +
-    '</div>' +
-  '</' + tag + '>';
+  return '<article class="card">' +
+    '<button class="face" type="button" aria-expanded="false" aria-controls="ov" data-i="' + i + '">' +
+      '<span class="art"><span class="art-inner">' + art + '</span></span>' +
+      '<span class="body">' +
+        '<span class="num">' + String(i + 1).padStart(2, '0') + '</span>' +
+        '<span class="h2">' + esc(p.titulo) + '</span>' +
+        '<span class="tagline">' + esc(p.tagline) + '</span>' +
+        '<span class="more"><span class="pl" aria-hidden="true">+</span>Ver el detalle</span>' +
+      '</span>' +
+    '</button>' +
+  '</article>';
 }
 
-document.getElementById('list').innerHTML = PROYECTOS.map(entryHTML).join('');
+function overlayHTML(p, i){
+  const art = p.imagen
+    ? '<img src="' + esc(p.imagen) + '" alt="">'
+    : (ART[p.art] || '');
+  const items = (p.items || []).map(itemHTML).join('');
 
-/* Subrayado del H1: misma librería y mismos parámetros que el hero de
-   a13i-accelerator. Si el CDN no carga, el texto queda legible sin la decoración. */
-window.addEventListener('load', function(){
-  if(!window.RoughNotation) return;
-  if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  const el = document.getElementById('hlCuriosidad');
-  if(el) window.RoughNotation.annotate(el, {
-    type:'underline', color:'#D4612A', strokeWidth:2, iterations:2, animationDuration:800
-  }).show();
+  return '<div class="ov-art">' + art + '</div>' +
+    '<div class="ov-body">' +
+      '<div class="ov-head">' +
+        '<div>' +
+          '<span class="ov-num">' + String(i + 1).padStart(2, '0') + '</span>' +
+          '<h3>' + esc(p.titulo) + '</h3>' +
+        '</div>' +
+        '<button class="close" type="button" aria-label="Cerrar detalle">&#10005;</button>' +
+      '</div>' +
+      (p.lead ? '<p class="lead">' + esc(p.lead) + '</p>' : '') +
+      (items ? '<ul class="items">' + items + '</ul>' : '') +
+      (p.link
+        ? '<a class="visit" href="' + esc(p.link) + '" target="_blank" rel="noopener">' +
+          urlLabel(p.link) + '<span class="ar" aria-hidden="true">&#8599;</span></a>'
+        : '') +
+    '</div>';
+}
+
+const grid = document.getElementById('grid');
+grid.innerHTML = PROYECTOS.map(cardHTML).join('');
+
+const overlay = document.createElement('div');
+overlay.className = 'overlay';
+overlay.id = 'ov';
+overlay.setAttribute('aria-hidden', 'true');
+grid.appendChild(overlay);
+
+/* ── Abrir / cerrar el detalle ───────────────────────────────── */
+let abierta = -1;
+
+/* Si el detalle no entra en el panel, baja --so hasta que entre.
+   Nunca aparece scroll: escala, no recorta. */
+function fitOverlay(){
+  const bodyEl = overlay.querySelector('.ov-body');
+  if(!bodyEl) return;
+  const entra = () => bodyEl.scrollHeight <= bodyEl.clientHeight + 1;
+  overlay.style.setProperty('--so', '1');
+  if(entra()) return;
+  let lo = 0.5, hi = 1, best = 0.5;
+  for(let k = 0; k < 12; k++){
+    const mid = (lo + hi) / 2;
+    overlay.style.setProperty('--so', mid.toFixed(4));
+    if(entra()){ best = mid; lo = mid; } else { hi = mid; }
+  }
+  overlay.style.setProperty('--so', best.toFixed(4));
+}
+
+function abrir(i){
+  const p = PROYECTOS[i];
+  if(!p) return;
+  overlay.innerHTML = overlayHTML(p, i);
+  overlay.classList.add('is-on');
+  overlay.setAttribute('aria-hidden', 'false');
+  grid.querySelectorAll('.face').forEach((f, k) => f.setAttribute('aria-expanded', String(k === i)));
+  abierta = i;
+  fitOverlay();
+  const c = overlay.querySelector('.close');
+  if(c) c.focus();
+  if(window.gtag) gtag('event', 'lab_proyecto_abierto', { proyecto: p.titulo });
+}
+
+function cerrar(){
+  if(abierta < 0) return;
+  overlay.classList.remove('is-on');
+  overlay.setAttribute('aria-hidden', 'true');
+  const face = grid.querySelectorAll('.face')[abierta];
+  grid.querySelectorAll('.face').forEach(f => f.setAttribute('aria-expanded', 'false'));
+  abierta = -1;
+  if(face) face.focus();
+}
+
+grid.addEventListener('click', (e) => {
+  if(e.target.closest('.close')){ cerrar(); return; }
+  if(e.target.closest('.visit')) return;
+  const face = e.target.closest('.face');
+  if(!face) return;
+  const i = Number(face.dataset.i);
+  if(i === abierta) cerrar(); else abrir(i);
 });
+
+document.addEventListener('keydown', (e) => { if(e.key === 'Escape') cerrar(); });
+document.addEventListener('click', (e) => {
+  if(abierta >= 0 && !e.target.closest('#ov') && !e.target.closest('.face')) cerrar();
+});
+
+/* ── Que entre todo en una pantalla ──────────────────────────────
+   Todo el layout esta en em sobre el font-size de .screen, asi que
+   alcanza con bajar --s para que la pagina entera escale. */
+const screenEl = document.querySelector('.screen');
+const innerEl  = document.querySelector('.inner');
+const setS = (v) => document.documentElement.style.setProperty('--s', String(v));
+
+function alto(){
+  const cs = getComputedStyle(screenEl);
+  return innerEl.getBoundingClientRect().height
+       + parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+}
+
+function fit(){
+  setS(1);
+  if(alto() <= screenEl.clientHeight) return;
+  let lo = 0.45, hi = 1, best = 0.45;
+  for(let i = 0; i < 14; i++){
+    const mid = (lo + hi) / 2;
+    setS(mid.toFixed(4));
+    if(alto() <= screenEl.clientHeight){ best = mid; lo = mid; } else { hi = mid; }
+  }
+  setS(best.toFixed(4));
+}
+
+/* ── Subrayado del H1 ────────────────────────────────────────────
+   Portado tal cual del hero de a13i-accelerator: roughjs a mano, dos
+   pasadas de linea (ida y vuelta) sobre cada rect del texto. Si el CDN
+   no carga, no pasa nada y el texto queda legible igual. */
+const NS = 'http://www.w3.org/2000/svg';
+let hlSvg = null;
+
+function hlDraw(){
+  const el = document.getElementById('hlCuriosidad');
+  if(!el || !hlSvg || !window.rough) return;
+  while(hlSvg.firstChild) hlSvg.removeChild(hlSvg.firstChild);
+  const rc = rough.svg(hlSvg);
+  const base = hlSvg.getBoundingClientRect();
+  const color = el.getAttribute('data-hl-color') || '#D4612A';
+  const rects = el.getClientRects();
+  for(let i = 0; i < rects.length; i++){
+    const r = rects[i];
+    if(r.width < 2) continue;
+    const x = r.left - base.left, w = r.width, y = (r.top - base.top) + r.height + 1;
+    const o = { stroke:color, strokeWidth:2.5, roughness:1.3, bowing:1.2, disableMultiStroke:true };
+    hlSvg.appendChild(rc.line(x, y, x + w, y, o));
+    hlSvg.appendChild(rc.line(x + w, y, x, y, o));
+  }
+}
+
+function hlSetup(){
+  const el = document.getElementById('hlCuriosidad');
+  if(!el || hlSvg || !window.rough) return;
+  el.style.display = 'inline';
+  hlSvg = document.createElementNS(NS, 'svg');
+  Object.assign(hlSvg.style, {
+    position:'absolute', top:'0', left:'0', width:'100px', height:'100px',
+    overflow:'visible', pointerEvents:'none'
+  });
+  el.insertAdjacentElement('afterend', hlSvg);
+  hlDraw();
+}
+
+let raf;
+function relayout(){
+  if(raf) cancelAnimationFrame(raf);
+  raf = requestAnimationFrame(() => { fit(); hlDraw(); if(abierta >= 0) fitOverlay(); });
+}
+
+function boot(){
+  fit();
+  hlSetup();
+}
+
+(document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve())
+  .then(() => setTimeout(boot, 30));
+window.addEventListener('load', relayout);
+window.addEventListener('resize', relayout, { passive:true });
 </script>
 
 </body>
