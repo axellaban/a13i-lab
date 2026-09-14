@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="/favicon/favicon.ico" sizes="any">
+<link rel="icon" href="/favicon/favicon-192.png" type="image/png" sizes="192x192">
+<link rel="icon" href="/favicon/favicon-512.png" type="image/png" sizes="512x512">
+<link rel="apple-touch-icon" href="/favicon/apple-touch-icon.png">
+
+<title>A13I Lab — Experimentos y proyectos de IA aplicada</title>
+<meta name="description" content="El banco de pruebas de A13I: agentes, flujos y modelos que armamos, rompemos y medimos antes de meterlos en una operación real.">
+<meta property="og:title" content="A13I Lab — Experimentos y proyectos de IA aplicada">
+<meta property="og:description" content="Agentes, flujos y modelos que armamos, rompemos y medimos antes de meterlos en una operación real.">
+<meta property="og:image" content="/assets/og-image.jpg">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="A13I Lab — Experimentos y proyectos de IA aplicada">
+<meta name="twitter:description" content="Agentes, flujos y modelos que armamos, rompemos y medimos antes de meterlos en una operación real.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/rough-notation@0.5.1/lib/rough-notation.iife.js"></script>
+
+<!-- Google tag (gtag.js) — misma propiedad que accelerator/partner -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-FV5WCTFBC3"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-FV5WCTFBC3');
+</script>
+
+<style>
+  :root{
+    /* Paleta: idéntica a a13i-accelerator / a13i-partner */
+    --bg:          #FEFBF2;
+    --card:        #FFFFFF;
+    --card-2:      #FDFAF3;
+    --ui:          #F7F0E4;
+    --border:      #E8E3DE;
+    --border-2:    #EAD9C8;
+    --text:        #1A1410;
+    --muted:       #6B5A4A;
+    --dim:         #6B6560;
+    --faint:       #8C7A68;
+    --accent:      #D4612A;
+    --accent-2:    #E15E3F;
+    --accent-deep: #A04510;
+    --accent-soft: rgba(212,97,42,0.12);
+    --accent-glow: rgba(212,97,42,0.22);
+    --green:       #1E8E5A;
+    --amber:       #B5790A;
+    --dark:        #1F1410;
+    --dark-2:      #2E1A0E;
+    --dark-fg:     #FFF4EB;
+    --dark-muted:  #A89F92;
+
+    --sans: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+    --header-h: 60px;
+    --maxw: 1080px;
+  }
+
+  @property --ba{ syntax:"<angle>"; initial-value:0deg; inherits:false; }
+  @keyframes border-beam-rotate{ to{ --ba:360deg; } }
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html{ -webkit-font-smoothing:antialiased; scroll-behavior:smooth; scroll-padding-top:calc(var(--header-h) + 24px); }
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    line-height:1.6;
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+  /* Textura de papel + halo cálido: mismo tratamiento que el resto de los sitios */
+  body::before{
+    content:''; position:fixed; inset:0; z-index:100;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+    opacity:.015; pointer-events:none; mix-blend-mode:multiply;
+  }
+  body::after{
+    content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
+    background:radial-gradient(900px at 18% -5%, rgba(212,97,42,0.07), transparent 62%);
+  }
+
+  a{ color:inherit; text-decoration:none; }
+  img{ max-width:100%; display:block; }
+  ::selection{ background:var(--accent-glow); }
+  :focus-visible{ outline:2px solid var(--accent); outline-offset:3px; border-radius:6px; }
+
+  .wrap{ width:100%; max-width:var(--maxw); margin:0 auto; padding:0 clamp(20px,4vw,48px); position:relative; z-index:2; }
+
+  /* ── HEADER ──────────────────────────────────────────────────── */
+  .site-header{
+    position:fixed; top:0; left:0; right:0; z-index:50;
+    height:var(--header-h);
+    background:rgba(254,251,242,0.96);
+    backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px);
+    border-bottom:1px solid var(--border);
+  }
+  .header-row{
+    height:var(--header-h); max-width:1280px; margin:0 auto;
+    padding:0 clamp(16px,4vw,56px);
+    display:flex; align-items:center; justify-content:space-between; gap:16px;
+  }
+  .logo{
+    font-family:'Space Grotesk','Arial',sans-serif;
+    font-weight:700; font-size:23px; letter-spacing:-.3px; line-height:1;
+    white-space:nowrap; flex-shrink:0; color:#111;
+    transition:opacity .15s;
+  }
+  .logo:hover{ opacity:.8; }
+  .logo .o{ color:#D44B2A; }
+  .logo .it{ font-style:italic; font-size:.92em; }
+  .nav{ display:flex; align-items:center; gap:0; }
+  .nav a{
+    padding:8px 14px; font-size:13.5px; font-weight:500; color:var(--dim);
+    transition:color .15s;
+  }
+  .nav a:hover{ color:var(--text); }
+  .cta{
+    position:relative; isolation:isolate; overflow:hidden;
+    display:inline-flex; align-items:center; gap:10px;
+    padding:8px 8px 8px 16px; border-radius:9px;
+    font-size:14px; font-weight:600; letter-spacing:-.01em;
+    background:var(--dark-2); color:#fff; white-space:nowrap;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.08), 0 1px 2px rgba(20,12,6,.25), 0 4px 8px rgba(20,12,6,.20);
+  }
+  .cta .beam{
+    position:absolute; inset:0; border-radius:inherit; pointer-events:none; padding:1.5px;
+    background:conic-gradient(from var(--ba,0deg), transparent 0deg, transparent 270deg, var(--accent-2) 310deg, #FFB085 330deg, transparent 360deg);
+    -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite:xor; mask-composite:exclude;
+    animation:border-beam-rotate 4s linear infinite;
+  }
+  .cta .arrow{
+    width:26px; height:26px; border-radius:7px; flex-shrink:0;
+    display:inline-flex; align-items:center; justify-content:center;
+    background:rgba(255,255,255,.15); font-family:var(--mono); font-size:14px; font-weight:700;
+    position:relative; z-index:1;
+  }
+  .cta .label{ position:relative; z-index:1; }
+  @media(max-width:760px){
+    .nav{ display:none; }
+    .logo{ font-size:16px; }
+    .cta{ padding:6px 6px 6px 11px; font-size:13px; gap:6px; }
+    .cta .arrow{ width:22px; height:22px; font-size:12px; }
+  }
+
+  /* ── HERO ────────────────────────────────────────────────────── */
+  .hero{ padding:calc(var(--header-h) + clamp(56px,10vh,112px)) 0 clamp(32px,5vh,52px); }
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:var(--mono); font-size:11px; font-weight:700;
+    letter-spacing:.16em; text-transform:uppercase; color:var(--accent-deep);
+    padding:5px 13px; border-radius:100px;
+    border:1px solid rgba(212,97,42,.25); background:rgba(212,97,42,.07);
+    margin-bottom:26px;
+  }
+  .eyebrow .dot{ width:6px; height:6px; border-radius:50%; background:var(--accent); animation:pulse 1.8s ease-in-out infinite; }
+  @keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:.2;} }
+
+  h1{
+    font-family:var(--sans);
+    font-size:clamp(2rem,4.6vw,3.6rem);
+    font-weight:700; line-height:1.05; letter-spacing:-.035em;
+    max-width:17ch; margin-bottom:20px;
+  }
+  .hero-sub{
+    font-size:15px; line-height:1.65; color:var(--muted);
+    max-width:60ch; margin-bottom:28px;
+  }
+  .hero-sub strong{ color:var(--text); font-weight:600; }
+  .hero-meta{
+    display:flex; flex-wrap:wrap; align-items:center; gap:8px 18px;
+    font-family:var(--mono); font-size:11.5px; font-weight:500;
+    letter-spacing:.06em; text-transform:uppercase; color:var(--faint);
+  }
+  .hero-meta b{ color:var(--text); font-weight:700; }
+  .hero-meta .sep{ width:4px; height:4px; border-radius:50%; background:var(--border-2); }
+  @media(max-width:600px){
+    .hero{ padding-top:calc(var(--header-h) + 44px); }
+    h1{ max-width:100%; }
+    .hero-sub{ font-size:14.5px; }
+  }
+
+  /* ── SECCIÓN / FILTROS ───────────────────────────────────────── */
+  .section{ padding:clamp(20px,3vh,32px) 0 clamp(56px,9vh,96px); }
+  .section-head{
+    display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:space-between;
+    gap:16px; padding-bottom:18px; margin-bottom:24px; border-bottom:1px solid var(--border);
+  }
+  .section-kicker{
+    font-family:var(--mono); font-size:11px; font-weight:700;
+    letter-spacing:.16em; text-transform:uppercase; color:var(--accent-deep);
+    display:flex; align-items:center; gap:8px; margin-bottom:8px;
+  }
+  .section-kicker .dot{ width:7px; height:7px; border-radius:50%; background:var(--accent); flex-shrink:0; }
+  .section-title{
+    font-size:clamp(1.35rem,2.4vw,1.8rem); font-weight:800;
+    letter-spacing:-.028em; line-height:1.15;
+  }
+  .filters{ display:flex; flex-wrap:wrap; gap:8px; }
+  .chip{
+    font-family:var(--mono); font-size:11px; font-weight:600;
+    letter-spacing:.08em; text-transform:uppercase;
+    padding:7px 13px; border-radius:100px; cursor:pointer;
+    background:transparent; border:1px solid var(--border-2); color:var(--muted);
+    transition:border-color .16s, background .16s, color .16s;
+  }
+  .chip:hover{ border-color:var(--accent); color:var(--text); }
+  .chip[aria-pressed="true"]{
+    background:var(--accent); border-color:var(--accent); color:#fff;
+    box-shadow:0 3px 10px rgba(212,97,42,.28);
+  }
+  .chip .n{ opacity:.6; margin-left:5px; }
+
+  /* ── GRID DE PROYECTOS ───────────────────────────────────────── */
+  .grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
+  @media(max-width:980px){ .grid{ grid-template-columns:repeat(2,1fr); } }
+  @media(max-width:660px){ .grid{ grid-template-columns:1fr; gap:14px; } }
+
+  .card{
+    display:flex; flex-direction:column;
+    background:var(--card); border:1px solid var(--border-2); border-radius:18px;
+    padding:20px 22px 18px;
+    box-shadow:0 2px 12px rgba(31,20,16,.05);
+    transition:transform .22s cubic-bezier(.22,1,.36,1), box-shadow .22s, border-color .22s;
+  }
+  a.card:hover{ transform:translateY(-3px); box-shadow:0 12px 32px rgba(31,20,16,.10); border-color:rgba(212,97,42,.3); }
+  .card-top{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px; }
+  .status{
+    display:inline-flex; align-items:center; gap:7px;
+    font-family:var(--mono); font-size:10px; font-weight:700;
+    letter-spacing:.16em; text-transform:uppercase; color:var(--accent-deep);
+  }
+  .status .dot{ width:7px; height:7px; border-radius:50%; background:var(--accent); flex-shrink:0; }
+  .status[data-estado="produccion"]{ color:var(--green); }
+  .status[data-estado="produccion"] .dot{ background:var(--green); }
+  .status[data-estado="experimento"]{ color:var(--amber); }
+  .status[data-estado="experimento"] .dot{ background:var(--amber); }
+  .status[data-estado="archivado"]{ color:var(--faint); }
+  .status[data-estado="archivado"] .dot{ background:var(--faint); }
+  .card-date{
+    font-family:var(--mono); font-size:10.5px; font-weight:500;
+    letter-spacing:.1em; color:var(--faint); flex-shrink:0;
+  }
+  .card h3{
+    font-size:1.05rem; font-weight:800; letter-spacing:-.025em; line-height:1.25;
+    margin-bottom:8px;
+  }
+  .metric{
+    font-family:var(--mono); font-size:12px; font-weight:700; letter-spacing:-.01em;
+    color:var(--accent); margin-bottom:8px;
+  }
+  .card p{ font-size:13px; line-height:1.55; color:var(--muted); margin-bottom:14px; }
+  .stack{ display:flex; flex-wrap:wrap; gap:6px; margin-top:auto; }
+  .tag{
+    font-family:var(--mono); font-size:10px; font-weight:600;
+    letter-spacing:.04em;
+    padding:4px 9px; border-radius:6px;
+    background:var(--ui); border:1px solid var(--border); color:var(--muted);
+  }
+  .card-link{
+    display:flex; align-items:center; gap:7px;
+    margin-top:14px; padding-top:13px; border-top:1px solid var(--border);
+    font-size:12.5px; font-weight:600; color:var(--accent);
+  }
+  .card-link .ar{ transition:transform .18s; }
+  a.card:hover .card-link .ar{ transform:translateX(3px); }
+
+  .empty{
+    grid-column:1/-1; text-align:center; padding:48px 20px;
+    font-family:var(--mono); font-size:12px; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--faint);
+  }
+
+  /* ── FOOTER ──────────────────────────────────────────────────── */
+  .site-footer{
+    position:relative; z-index:2;
+    background:var(--dark); color:var(--dark-fg);
+  }
+  .footer-inner{
+    max-width:1240px; margin:0 auto; padding:clamp(40px,6vh,64px) clamp(20px,4vw,48px) 0;
+  }
+  .footer-top{
+    display:flex; flex-wrap:wrap; align-items:flex-start; justify-content:space-between;
+    gap:28px; padding-bottom:clamp(36px,5vh,52px);
+  }
+  .footer-brand{ display:flex; flex-direction:column; gap:14px; max-width:420px; }
+  .footer-brand .logo{ color:var(--dark-fg); }
+  .footer-brand .logo .o{ color:var(--accent-2); }
+  .footer-brand p{ font-size:14px; line-height:1.55; color:var(--dark-muted); }
+  .footer-links{ display:flex; flex-direction:column; gap:14px; }
+  .footer-links .lbl{
+    font-family:var(--mono); font-size:11px; font-weight:700;
+    letter-spacing:.16em; text-transform:uppercase; color:var(--accent);
+  }
+  .footer-links ul{ list-style:none; display:flex; flex-direction:column; gap:10px; }
+  .footer-links a{ font-size:15px; color:var(--dark-fg); transition:opacity .15s; }
+  .footer-links a:hover{ opacity:.7; }
+  .footer-rule{ height:1px; background:rgba(255,255,255,.08); }
+  .footer-bottom{
+    padding:24px 0 32px; text-align:center;
+    font-family:var(--mono); font-size:11px; font-weight:600;
+    letter-spacing:.16em; text-transform:uppercase; color:var(--dark-muted);
+  }
+
+  @media(prefers-reduced-motion:reduce){
+    *,*::before,*::after{ animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; }
+    html{ scroll-behavior:auto; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ─────────────────────────────────────────────────── -->
+<header class="site-header">
+  <div class="header-row">
+    <a class="logo" href="/" aria-label="A13I Lab">A<span class="o">13</span>I<span class="o">_</span><span class="it">LAB</span></a>
+    <nav class="nav">
+      <a href="#proyectos">Proyectos</a>
+      <a href="https://a13i-accelerator.vercel.app/" target="_blank" rel="noopener">Accelerator</a>
+      <a href="https://a13i-partner.vercel.app/" target="_blank" rel="noopener">Implementación</a>
+    </nav>
+    <a class="cta" href="https://a13i-accelerator.vercel.app/book" target="_blank" rel="noopener">
+      <span class="beam" aria-hidden="true"></span>
+      <span class="label">Agendá una llamada</span>
+      <span class="arrow" aria-hidden="true">&rarr;</span>
+    </a>
+  </div>
+</header>
+
+<main>
+
+  <!-- ── HERO ─────────────────────────────────────────────────── -->
+  <section class="hero">
+    <div class="wrap">
+      <span class="eyebrow"><span class="dot" aria-hidden="true"></span>A13I · Lab</span>
+      <h1>
+        <span id="hlUnderline">Lo que probamos</span> antes de meterlo en una <span id="hlHighlight">operación real</span>.
+      </h1>
+      <p class="hero-sub">
+        Acá vive el banco de pruebas de A13I: agentes, flujos y modelos que armamos, rompemos y medimos.
+        <strong>Lo que funciona termina adentro de un cliente. Lo que no, queda documentado acá igual.</strong>
+      </p>
+      <div class="hero-meta">
+        <span><b id="statTotal">0</b> proyectos</span>
+        <span class="sep" aria-hidden="true"></span>
+        <span><b id="statProd">0</b> en producción</span>
+        <span class="sep" aria-hidden="true"></span>
+        <span>Última actualización <b id="statUpdated">—</b></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── PROYECTOS ────────────────────────────────────────────── -->
+  <section class="section" id="proyectos">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <div class="section-kicker"><span class="dot" aria-hidden="true"></span>Banco de pruebas</div>
+          <h2 class="section-title">Proyectos y experimentos</h2>
+        </div>
+        <div class="filters" id="filters" role="group" aria-label="Filtrar por estado"></div>
+      </div>
+      <div class="grid" id="grid"></div>
+      <noscript>
+        <p class="empty">Activá JavaScript para ver el listado de proyectos.</p>
+      </noscript>
+    </div>
+  </section>
+
+</main>
+
+<!-- ── FOOTER ─────────────────────────────────────────────────── -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <span class="logo">A<span class="o">13</span>I<span class="o">_</span><span class="it">LAB</span></span>
+        <p>El laboratorio de IA aplicada de A13I. Lo que probamos acá es lo que después implementamos en operaciones reales.</p>
+      </div>
+      <div class="footer-links">
+        <span class="lbl">A13I</span>
+        <ul>
+          <li><a href="https://a13i-accelerator.vercel.app/" target="_blank" rel="noopener">Accelerator</a></li>
+          <li><a href="https://a13i-partner.vercel.app/" target="_blank" rel="noopener">Implementación</a></li>
+          <li><a href="https://a13i-accelerator.vercel.app/client-wins" target="_blank" rel="noopener">Casos de éxito</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-rule" aria-hidden="true"></div>
+    <div class="footer-bottom">© 2026 A13I Lab</div>
+  </div>
+</footer>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   PROYECTOS — única fuente de verdad del listado.
+   Para agregar uno, sumá un objeto a este array. Nada más.
+
+   {
+     titulo:  string           obligatorio
+     resumen: string           obligatorio — 1 o 2 líneas, qué hace y qué resolvió
+     estado:  'produccion' | 'curso' | 'experimento' | 'archivado'
+     fecha:   string           lo que se muestra arriba a la derecha ('2026', 'Q1 2026', etc.)
+     metrica: string           opcional — el número que importa
+     stack:   string[]         opcional — máx. 4 rinde mejor visualmente
+     link:    string           opcional — si está, la tarjeta es clickeable
+     linkLabel: string         opcional — texto del link (default: 'Ver el detalle')
+   }
+
+   ⚠️ CONTENIDO DE MUESTRA: los items de abajo están puestos para ver el layout
+   poblado. Salen de casos ya documentados en a13i-accelerator/client-wins.html
+   y a13i/sesion.html. Reemplazar por los proyectos reales del lab.
+   ═══════════════════════════════════════════════════════════════ */
+const PROYECTOS = [
+  {
+    titulo: 'Agente de posventa por WhatsApp',
+    resumen: 'Base de conocimiento conectada a los datos vivos de la operación: cada cliente recibe información de su pedido en tiempo real. Lo que necesita criterio pasa a un humano.',
+    estado: 'produccion',
+    fecha: '2026',
+    metrica: '85% resuelto sin intervención humana',
+    stack: ['RAG', 'HITL', 'WhatsApp API']
+  },
+  {
+    titulo: 'Recupero de abandono 24/7',
+    resumen: 'Mapeo de los puntos exactos donde el chat se cae y recupero automático de los que cortan sin comprar. Probado primero en producción propia.',
+    estado: 'produccion',
+    fecha: '2026',
+    metrica: '+40% de conversión',
+    stack: ['HITL', 'Agentic', 'Recovery']
+  },
+  {
+    titulo: 'Conciliación financiera automática',
+    resumen: 'Cruce de órdenes contra los pagos de cada pasarela y marketplace. El flujo concilia solo y deja marcado únicamente lo que no cierra.',
+    estado: 'produccion',
+    fecha: '2026',
+    metrica: '18 hs/semana recuperadas',
+    stack: ['n8n', 'Data Pipeline']
+  },
+  {
+    titulo: 'Flujo agéntico de contenido',
+    resumen: 'Research, calendarización y generación por canal en un solo flujo, donde cada paso le pasa el contexto al siguiente. Reemplazó cinco herramientas sueltas.',
+    estado: 'curso',
+    fecha: 'Q3 2026',
+    metrica: '12 hs/semana recuperadas',
+    stack: ['Multi-step', 'Agents', 'n8n']
+  },
+  {
+    titulo: 'Brief automático pre-reunión',
+    resumen: 'Un agente investiga el perfil completo antes de cada reunión B2B y arma el brief con next steps después. Pensado para ciclos de venta largos.',
+    estado: 'curso',
+    fecha: 'Q3 2026',
+    metrica: '6 hs/semana por comercial',
+    stack: ['Research Agent', 'Transcript']
+  },
+  {
+    titulo: 'Evaluación de alucinaciones en RAG',
+    resumen: 'Set de pruebas propio para medir cuánto se inventa un agente cuando la base de conocimiento no tiene la respuesta. Corre antes de cada puesta en producción.',
+    estado: 'experimento',
+    fecha: 'Q3 2026',
+    stack: ['Evals', 'RAG', 'Guardrails']
+  }
+];
+
+/* Etiquetas de estado. El orden acá es el orden de los filtros y del listado. */
+/* Se muestra en el hero. Actualizalo cuando sumes proyectos. */
+const ULTIMA_ACTUALIZACION = 'septiembre 2026';
+
+const ESTADOS = {
+  produccion:  'En producción',
+  curso:       'En curso',
+  experimento: 'Experimento',
+  archivado:   'Archivado'
+};
+const ORDEN = ['produccion', 'curso', 'experimento', 'archivado'];
+
+/* ── Render ──────────────────────────────────────────────────── */
+const grid    = document.getElementById('grid');
+const filters = document.getElementById('filters');
+let filtro = 'todos';
+
+const esc = (v) => String(v == null ? '' : v)
+  .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
+const ordenados = () =>
+  PROYECTOS.slice().sort((a, b) => ORDEN.indexOf(a.estado) - ORDEN.indexOf(b.estado));
+
+function cardHTML(p){
+  const clickable = !!p.link;
+  const tag  = clickable ? 'a' : 'div';
+  const attrs = clickable
+    ? ' href="' + esc(p.link) + '" target="_blank" rel="noopener"'
+    : '';
+  const stack = (p.stack || [])
+    .map(s => '<span class="tag">' + esc(s) + '</span>').join('');
+
+  return '<' + tag + ' class="card"' + attrs + '>' +
+    '<div class="card-top">' +
+      '<span class="status" data-estado="' + esc(p.estado) + '">' +
+        '<span class="dot" aria-hidden="true"></span>' + esc(ESTADOS[p.estado] || p.estado) +
+      '</span>' +
+      (p.fecha ? '<span class="card-date">' + esc(p.fecha) + '</span>' : '') +
+    '</div>' +
+    '<h3>' + esc(p.titulo) + '</h3>' +
+    (p.metrica ? '<div class="metric">' + esc(p.metrica) + '</div>' : '') +
+    '<p>' + esc(p.resumen) + '</p>' +
+    (stack ? '<div class="stack">' + stack + '</div>' : '') +
+    (clickable
+      ? '<span class="card-link">' + esc(p.linkLabel || 'Ver el detalle') +
+        '<span class="ar" aria-hidden="true">&rarr;</span></span>'
+      : '') +
+  '</' + tag + '>';
+}
+
+function render(){
+  const lista = ordenados().filter(p => filtro === 'todos' || p.estado === filtro);
+  grid.innerHTML = lista.length
+    ? lista.map(cardHTML).join('')
+    : '<p class="empty">Todavía no hay nada acá.</p>';
+  filters.querySelectorAll('.chip').forEach(c => {
+    c.setAttribute('aria-pressed', String(c.dataset.filtro === filtro));
+  });
+}
+
+function renderFiltros(){
+  const usados = ORDEN.filter(e => PROYECTOS.some(p => p.estado === e));
+  const opciones = [{ id: 'todos', label: 'Todos', n: PROYECTOS.length }]
+    .concat(usados.map(e => ({
+      id: e,
+      label: ESTADOS[e],
+      n: PROYECTOS.filter(p => p.estado === e).length
+    })));
+
+  filters.innerHTML = opciones.map(o =>
+    '<button type="button" class="chip" data-filtro="' + o.id + '" aria-pressed="false">' +
+      esc(o.label) + '<span class="n">' + o.n + '</span>' +
+    '</button>'
+  ).join('');
+
+  filters.addEventListener('click', (e) => {
+    const chip = e.target.closest('.chip');
+    if(!chip) return;
+    filtro = chip.dataset.filtro;
+    render();
+    if(window.gtag) gtag('event', 'lab_filtro', { filtro: filtro });
+  });
+}
+
+function renderStats(){
+  document.getElementById('statTotal').textContent = PROYECTOS.length;
+  document.getElementById('statProd').textContent  = PROYECTOS.filter(p => p.estado === 'produccion').length;
+  document.getElementById('statUpdated').textContent = ULTIMA_ACTUALIZACION;
+}
+
+/* Subrayado + highlight del H1: misma librería y mismos parámetros que el hero
+   de a13i-accelerator. Si el CDN no carga, el texto queda legible sin la decoración. */
+function initNotation(){
+  if(!window.RoughNotation) return;
+  if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const { annotate } = window.RoughNotation;
+  const u = document.getElementById('hlUnderline');
+  const h = document.getElementById('hlHighlight');
+  if(u) annotate(u, { type:'underline', color:'#D4612A', strokeWidth:2, iterations:2, animationDuration:800 }).show();
+  if(h) annotate(h, { type:'highlight', color:'rgba(225,94,63,0.22)', strokeWidth:1, iterations:1, padding:4, animationDuration:900 }).show();
+}
+
+renderFiltros();
+renderStats();
+render();
+window.addEventListener('load', initNotation);
+</script>
+
+</body>
+</html>
