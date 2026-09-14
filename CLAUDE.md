@@ -85,7 +85,10 @@ Todo sale del array `PROYECTOS` en el `<script>` de `index.html`. Es la única f
     { n: 'Nombre', d: 'Qué es, en una línea.' },
     { n: 'Otra versión', bullets: ['Detalle uno.', 'Detalle dos.'] }
   ],
-  link:   'https://…',                            // opcional
+  link:    'https://…',                           // opcional
+  modelos: ['Fable 5.1', 'Opus 5'],               // opcional — con qué se construyó
+  tokens:  '~3 M',                                // opcional — estimación
+  prompts: '1',                                   // opcional — solo si fue uno o dos
   art:    'copiloto',                             // clave de ART (arte generado)
   imagen: '/assets/loro.webp'                     // opcional — si está, reemplaza al arte
 }
@@ -96,6 +99,7 @@ Reglas:
 - `items` admite `n`, `d` y `bullets`. Se pueden combinar o usar sueltos.
 - `familia` agrupa productos que son parte de algo más grande sin necesidad de una ficha paraguas: los cuatro productos del Universo Loro tienen ficha propia y comparten esa etiqueta, que se ve en el detalle.
 - El label del link se deriva de la URL (se le saca el protocolo y la barra final).
+- `modelos` / `tokens` / `prompts` arman la ficha técnica al pie del detalle. **`tokens` es una estimación y la página lo dice** (la etiqueta es "Tokens estimados"): sale del tamaño del código del repo por un multiplicador según cómo se construyó — iterando con un agente se re-lee el proyecto muchas veces, un solo prompt no. No hay medición real de consumo en ningún lado, así que no presentarlo como dato duro.
 - Todo el contenido pasa por `esc()` antes de entrar al DOM. No romper eso al agregar campos.
 
 ## 🖼️ El arte de las fichas
@@ -203,5 +207,11 @@ Las de los cuatro productos del Universo Loro están escritas leyendo el código
 | Simulacro de Entrevistas | `axellaban/loro` (ruta `/mock` → `/simulador`) | loreado.vercel.app/mock |
 | Envía un Lorito | `axellaban/Enviaunloro` | enviaunlorito.vercel.app |
 | Loro Run | `axellaban/juego-fitness` | juego-fitness.vercel.app |
+| Arquitectura Transformer | `axellaban/transformer-architecture` (fork) | transformer-architecture.vercel.app |
+| Dashboard eCommerce Day 2026 | `axellaban/eday-argentina-2026-eCommerce-StartUp-Competition` | eday-2026-argentina-demo-day.vercel.app |
 
 `axellaban/universo-loro` es la página índice que los agrupa. Copiloto y Simulacro son **dos productos distintos** del mismo repo, no dos nombres de lo mismo.
+
+⚠️ **`transformer-architecture` es un fork.** El README del repo apunta a "la demo original" en `transformer-architecture.petergostev.chatgpt.site` y dice "Construido con GPT-6-Astra en Codex". Lo de Axel encima es una capa de cambios (narración en reproducción libre, página de diagnóstico). Está listado en el lab igual, pero conviene decidir si se aclara de dónde viene: en una página que arranca con "mi sueño era ser científico loco", presentar un fork sin marcarlo se lee como propio.
+
+**"Astra 6" es un modelo, no un proyecto.** El nombre real del proyecto es "Arquitectura Transformer"; GPT-6-Astra es con lo que se construyó — por eso aparece en `modelos` y no en `titulo`.

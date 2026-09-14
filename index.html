@@ -268,9 +268,22 @@
     content:''; position:absolute; left:0; top:.55em;
     width:.36em; height:.36em; border-radius:50%; background:var(--accent); opacity:.6;
   }
+  .ov-foot{ margin-top:auto; padding-top:1.2em; }
+  .tech{
+    display:flex; flex-wrap:wrap; gap:.5em 2.2em;
+    padding:.85em 0 .9em; border-top:1px solid var(--border);
+  }
+  .tech-cel{ display:flex; flex-direction:column; gap:.2em; min-width:0; }
+  .tech-l{
+    font-family:var(--mono); font-size:.62em; font-weight:700;
+    letter-spacing:.16em; text-transform:uppercase; color:var(--faint);
+  }
+  .mt-aprox{ color:var(--faint); opacity:.7; }
+  .tech-v{ font-size:.85em; font-weight:600; letter-spacing:-.01em; color:var(--text); }
+
   .visit{
     display:inline-flex; align-items:center; gap:.6em; align-self:flex-start;
-    margin-top:auto; padding-top:1.2em;
+    padding-top:.2em;
     font-family:var(--mono); font-size:.8em; font-weight:600;
     color:var(--accent-deep); overflow-wrap:anywhere;
   }
@@ -349,7 +362,8 @@
       background:rgba(254,251,242,.92); border:1px solid var(--border-2);
       box-shadow:0 2px 10px rgba(31,20,16,.14);
     }
-    .visit{ font-size:.82em; padding-top:1.3em; }
+    .visit{ font-size:.82em; padding-top:.2em; }
+    .tech{ gap:.5em 1.4em; padding:.7em 0 .8em; }
   }
 
   /* Telefono: dos columnas. Tres ya no entran sin que el arte se achique. */
@@ -723,6 +737,9 @@ const ART = {
                         que expliquen solas de que se trata, sin jerga
      lead:    string    opcional — primera linea del detalle
      items:   [{ n, d, bullets[] }]   opcional — sub-productos o versiones
+     modelos: string[]  opcional — con que se construyo
+     tokens:  string    opcional — estimacion, la pagina la marca como tal
+     prompts: string    opcional — solo si se hizo en uno o dos prompts
      link:    string    opcional
      art:     clave de ART            arte generado de la ficha
      imagen:  '/assets/x.webp'        opcional — si esta, reemplaza al arte
@@ -731,6 +748,8 @@ const ART = {
 const PROYECTOS = [
   {
     titulo: 'Copiloto de Entrevistas',
+    modelos: ['Fable 5.1', 'Opus 5'],
+    tokens: '~3 M',
     familia: 'Universo Loro',
     pitch: 'Te sopla qué responder mientras te hacen una entrevista.',
     art: 'copiloto',
@@ -748,6 +767,8 @@ const PROYECTOS = [
   },
   {
     titulo: 'Simulacro de Entrevistas',
+    modelos: ['Fable 5.1', 'Opus 5'],
+    tokens: '~2,5 M',
     familia: 'Universo Loro',
     pitch: 'Practicás una entrevista con una IA y te corrige después.',
     art: 'simulacro',
@@ -765,6 +786,8 @@ const PROYECTOS = [
   },
   {
     titulo: 'Envía un Lorito',
+    modelos: ['Fable 5.1', 'Opus 5'],
+    tokens: '~6 M',
     familia: 'Universo Loro',
     pitch: 'Mandás un mensaje y un pájaro lo lleva volando, lento.',
     art: 'lorito',
@@ -783,6 +806,9 @@ const PROYECTOS = [
   },
   {
     titulo: 'Loro Run',
+    modelos: ['GPT-6-Astra'],
+    tokens: '~120 k',
+    prompts: '1',
     familia: 'Universo Loro',
     pitch: 'Jugás moviendo el cuerpo: la cámara te lee los movimientos.',
     art: 'fitness',
@@ -796,6 +822,8 @@ const PROYECTOS = [
   },
   {
     titulo: 'Dashboard eCommerce Day 2026',
+    modelos: ['Fable 5.1', 'Opus 5'],
+    tokens: '~3,5 M',
     pitch: 'Una IA escucha a quien presenta y lo puntúa.',
     art: 'eday',
     items: [
@@ -811,7 +839,10 @@ const PROYECTOS = [
     link: 'https://eday-2026-argentina-demo-day.vercel.app/ai-unified-commerce'
   },
   {
-    titulo: 'Astra 6',
+    titulo: 'Arquitectura Transformer',
+    modelos: ['GPT-6-Astra'],
+    tokens: '~200 k',
+    prompts: '1',
     pitch: 'En 3D: cómo cambió la IA por dentro desde 2018.',
     art: 'astra',
     lead: 'Render 3D que compara el paper de DeepSeek v4.1 Flash con el modelo origen de los transformers de 2018.',
@@ -851,6 +882,28 @@ function cardHTML(p, i){
   '</article>';
 }
 
+/* Modelos usados y estimacion de tokens. La estimacion sale del tamano
+   del codigo en el repo por un multiplicador segun como se construyo:
+   iterando con un agente se re-lee el proyecto muchas veces, un solo
+   prompt no. Es a ojo y la pagina lo dice. */
+function fichaTecnica(p){
+  const celdas = [];
+  if(p.modelos && p.modelos.length){
+    celdas.push({ l:'Modelos', v:p.modelos.join(' · ') });
+  }
+  if(p.tokens){
+    celdas.push({ l:'Tokens <span class="mt-aprox">estimados</span>', v:p.tokens });
+  }
+  if(p.prompts){
+    celdas.push({ l:'Prompts', v:p.prompts });
+  }
+  if(!celdas.length) return '';
+  return '<div class="tech">' + celdas.map(c =>
+    '<span class="tech-cel"><span class="tech-l">' + c.l + '</span>' +
+    '<span class="tech-v">' + esc(c.v) + '</span></span>'
+  ).join('') + '</div>';
+}
+
 function overlayHTML(p, i){
   const art = p.imagen
     ? '<img src="' + esc(p.imagen) + '" alt="">'
@@ -871,10 +924,13 @@ function overlayHTML(p, i){
       '</div>' +
       (p.lead ? '<p class="lead">' + esc(p.lead) + '</p>' : '') +
       (items ? '<ul class="items">' + items + '</ul>' : '') +
-      (p.link
-        ? '<a class="visit" href="' + esc(p.link) + '" target="_blank" rel="noopener">' +
-          urlLabel(p.link) + '<span class="ar" aria-hidden="true">&#8599;</span></a>'
-        : '') +
+      '<div class="ov-foot">' +
+        fichaTecnica(p) +
+        (p.link
+          ? '<a class="visit" href="' + esc(p.link) + '" target="_blank" rel="noopener">' +
+            urlLabel(p.link) + '<span class="ar" aria-hidden="true">&#8599;</span></a>'
+          : '') +
+      '</div>' +
     '</div>';
 }
 
