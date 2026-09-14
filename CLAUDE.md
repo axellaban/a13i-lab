@@ -26,9 +26,11 @@ a13i-lab/
 
 ```
 logo A13I_LAB
-título  |  bajada        ← dos columnas en desktop, apiladas en mobile
-[ ficha 01 ] [ ficha 02 ] [ ficha 03 ]   ← grilla portfolio
+título + bajada   |   meme        ← dos columnas en desktop, apiladas en mobile
+[ 01 ] [ 02 ] [ 03 ] [ 04 ] [ 05 ]      ← grilla portfolio
 ```
+
+La grilla es `repeat(auto-fit, minmax(12em, 1fr))`: reparte sola las fichas que haya, sin dejar huecos en la última fila. Con hasta 5 entran todas en una fila; a partir de ahí arma dos.
 
 Al tocar una ficha se abre un panel que cubre **toda la grilla** (arte a la izquierda, detalle a la derecha). En mobile ese panel pasa a pantalla completa. Se cierra con la ✕, con Escape o tocando afuera.
 
@@ -51,7 +53,8 @@ Todo sale del array `PROYECTOS` en el `<script>` de `index.html`. Es la única f
 
 ```js
 {
-  titulo:  'Universo Loro',                       // obligatorio
+  titulo:  'Copiloto de Entrevistas con IA',      // obligatorio
+  familia: 'Universo Loro',                       // opcional — etiqueta arriba del título
   tagline: 'La línea que se ve con la ficha cerrada.',  // obligatorio
   lead:    'Primera línea del detalle.',          // opcional
   items: [                                        // opcional — sub-productos o versiones
@@ -59,19 +62,20 @@ Todo sale del array `PROYECTOS` en el `<script>` de `index.html`. Es la única f
     { n: 'Otra versión', bullets: ['Detalle uno.', 'Detalle dos.'] }
   ],
   link:   'https://…',                            // opcional
-  art:    'loro',                                 // clave de ART (arte generado)
+  art:    'copiloto',                             // clave de ART (arte generado)
   imagen: '/assets/loro.webp'                     // opcional — si está, reemplaza al arte
 }
 ```
 
 Reglas:
 - `items` admite `n`, `d` y `bullets`. Se pueden combinar o usar sueltos.
+- `familia` agrupa productos que son parte de algo más grande sin necesidad de una ficha paraguas: los tres productos del Universo Loro tienen ficha propia y comparten esa etiqueta.
 - El label del link se deriva de la URL (se le saca el protocolo y la barra final).
 - Todo el contenido pasa por `esc()` antes de entrar al DOM. No romper eso al agregar campos.
 
 ## 🖼️ El arte de las fichas
 
-El objeto `ART` tiene un SVG por proyecto, dibujado a mano en la paleta del sitio, que ilustra lo que hay adentro (órbitas para Universo Loro, radar + heatmap del fact checking para el eCommerce Day, bloques de transformers para Astra 6). Todos usan `viewBox="0 0 200 125"` (16:10, igual que `.art`) y `preserveAspectRatio="xMidYMid meet"`: así llenan exacto la ficha en desktop y se ven enteros, sin recorte, en el thumbnail cuadrado de mobile. El fondo de `.art` y `.ov-art` es plano `#FFFDF8` para que el encuadre nunca se note.
+El objeto `ART` tiene un SVG por proyecto, dibujado a mano en la paleta del sitio, que ilustra lo que hay adentro: `copiloto` (burbuja con waveform + anillo de puntaje), `lorito` (avión de papel con estela y reloj), `fitness` (HUD de juego), `eday` (radar chart + heatmap del fact checking), `astra` (bloques de transformers con líneas de atención) y `loro` (órbitas, quedó sin usar al separar los productos, sirve si vuelve una ficha paraguas). Todos usan `viewBox="0 0 200 125"` (16:10, igual que `.art`) y `preserveAspectRatio="xMidYMid meet"`: así llenan exacto la ficha en desktop y se ven enteros, sin recorte, en el thumbnail cuadrado de mobile. El fondo de `.art` y `.ov-art` es plano `#FFFDF8` para que el encuadre nunca se note.
 
 **Para poner una captura real** en lugar del SVG: dejar el archivo en `assets/` y agregarle `imagen: '/assets/loquesea.webp'` al proyecto. El SVG queda como fallback si algún día se saca la imagen.
 
@@ -92,6 +96,10 @@ Mismos tokens que `a13i-accelerator`. Tokens en `:root`, nunca hardcodear hex.
 - **Wordmark:** `A13I_LAB` con `13` y `_` en naranja y `LAB` en itálica — mismo patrón que `A13I_ACCELERATOR`.
 - **Fondo:** textura de ruido SVG al 1.5% + un radial cálido arriba a la izquierda.
 - **Fichas:** blancas, radio `1.15em`, borde `--border-2`, hover con `translateY(-3px)` y un leve zoom del arte.
+
+### El meme
+
+El encabezado tiene un recuadro con un GIF del laboratorio de Dexter, en `assets/dexter-lab.gif`. **Si el archivo no está, el `onerror` del `<img>` muestra un dibujo propio de matraces** (inline en el HTML, clase `.meme-fb`) y la página no se ve rota. Es material de Cartoon Network / Warner: uso de meme, decisión de Axel.
 
 ### Subrayado del H1
 
@@ -124,5 +132,6 @@ Push a `main` → auto-deploy en Vercel.
 
 1. Capturas reales de los tres proyectos, para reemplazar el arte generado (campo `imagen`).
 2. `og:image` propio del lab (hoy reusa el genérico de accelerator).
-3. Universo Loro: Axel mencionó cuatro productos y quedaron listados tres (Copiloto de Entrevistas, Envía un Lorito, Loro Fitness). Falta confirmar el cuarto.
-4. Confirmar el dominio final.
+3. El GIF: dejar `assets/dexter-lab.gif` en el repo (hoy cae en el dibujo de fallback).
+4. Universo Loro: Axel mencionó cuatro productos y hay ficha para tres (Copiloto de Entrevistas, Envía un Lorito, Loro Fitness). Falta el cuarto.
+5. Confirmar el dominio final.
