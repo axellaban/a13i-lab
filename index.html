@@ -59,7 +59,7 @@
   }
 
   *{ box-sizing:border-box; margin:0; padding:0; }
-  html{ -webkit-font-smoothing:antialiased; }
+  html{ -webkit-font-smoothing:antialiased; -webkit-tap-highlight-color:transparent; }
   body{
     background:var(--bg); color:var(--text);
     font-family:var(--sans); line-height:1.55;
@@ -109,6 +109,7 @@
     font-weight:700; line-height:1.1; letter-spacing:-.032em;
   }
   .sub{ font-size:1.05em; line-height:1.55; color:var(--muted); margin-top:.85em; }
+  .nw{ white-space:nowrap; }
 
   /* ── MEME ────────────────────────────────────────────────────── */
   .meme{
@@ -277,36 +278,118 @@
   .visit .ar{ flex-shrink:0; transition:transform .18s; }
   .visit:hover .ar{ transform:translate(2px,-2px); }
 
-  /* ── MOBILE ──────────────────────────────────────────────────── */
+  /* ── MOBILE ──────────────────────────────────────────────────────
+     La ficha sigue siendo una ficha: arte arriba, frase abajo, en dos
+     columnas. Resuelto como lista horizontal el arte quedaba diminuto y
+     la grilla dejaba de leerse como portfolio. */
   @media(max-width:820px){
-    .screen{ padding:1.8em clamp(16px,5vw,28px); align-items:flex-start; }
-    .logo{ margin-bottom:1.3em; }
-    .head{ display:block; }
-    .meme{ width:42%; max-width:8.5em; margin-top:1em; }
-    .grid{ margin-top:1.5em; grid-template-columns:1fr; gap:.8em; }
-    .card{ border-radius:.9em; }
-    .card:hover{ transform:none; }
-    .face{ flex-direction:row; align-items:stretch; }
-    .art{
-      aspect-ratio:1/1; flex:0 0 26%; max-width:6.6em;
-      border-bottom:0; border-right:1px solid var(--border);
+    .screen{
+      padding:calc(1.5em + env(safe-area-inset-top)) clamp(16px,4.5vw,28px)
+              calc(1.4em + env(safe-area-inset-bottom));
     }
-    .body{ padding:.8em .9em; justify-content:center; }
-    .plus{ display:none; }
-    .momtest{ margin-top:1.1em; padding-top:1em; gap:.8em; align-items:center; }
-    .momtest img{ height:3.6em; margin-bottom:0; }
-    .momtest p{ font-size:.82em; padding-bottom:0; }
-    /* En pantalla chica el detalle ocupa toda la pantalla */
+    .logo{ font-size:1.35em; margin-bottom:1.1em; }
+
+    /* El meme al lado del titulo, no en una fila propia: ese renglon
+       suelto se comia una franja entera de la pantalla. */
+    .head{
+      grid-template-columns:minmax(0,1fr) 34%;
+      gap:0 1em; align-items:start;
+    }
+    .meme{ width:100%; max-width:none; transform:rotate(-2deg); margin-top:.3em; }
+    .meme:hover{ transform:rotate(-2deg); }
+    h1{ font-size:min(2.15em, 6.6vw); line-height:1.08; }
+    .sub{ font-size:.95em; margin-top:.7em; }
+
+    .grid{
+      margin-top:1.3em;
+      grid-template-columns:repeat(3, minmax(0,1fr)); gap:.8em;
+    }
+    .card{ border-radius:.95em; }
+    .card:hover{ transform:none; box-shadow:0 2px 12px rgba(31,20,16,.05); }
+    .card:active{ transform:scale(.975); border-color:rgba(212,97,42,.4); }
+    .card:hover .art-inner{ transform:none; }
+    .body{ padding:.75em .85em .85em; justify-content:center; }
+    .pitch{ font-size:.93em; line-height:1.28; }
+
+    /* En touch no hay hover: el + queda siempre, tenue, como pista. */
+    .plus{
+      display:inline-flex; opacity:.55; transform:scale(1);
+      width:1.7em; height:1.7em; font-size:.9em;
+    }
+    .card:active .plus{ opacity:1; }
+
+    .momtest{
+      margin-top:1.1em; padding-top:.9em; gap:.7em; align-items:center;
+    }
+    .momtest img{ height:3.4em; margin-bottom:0; }
+    .momtest p{ font-size:.78em; line-height:1.45; padding-bottom:0; }
+    .momtest .lbl{ margin-right:.5em; }
+
+    /* El detalle ocupa toda la pantalla */
     .overlay{
       top:0; left:0; width:100%; height:100%;
       border-radius:0; border:0;
       grid-template-columns:1fr; grid-template-rows:auto 1fr;
-      transform:translate(0,1.5%) scale(1);
+      transform:translate(0,2%) scale(1);
     }
     .overlay.is-on{ transform:translate(0,0) scale(1); }
-    .ov-art{ height:22vh; border-right:0; border-bottom:1px solid var(--border); }
-    .ov-body{ padding:1.4em 1.3em calc(1.3em + env(safe-area-inset-bottom)); overflow:auto; }
-    .overlay h3{ font-size:1.35em; }
+    .ov-art{
+      height:20vh; border-right:0; border-bottom:1px solid var(--border);
+    }
+    .ov-body{
+      padding:1.3em 1.2em calc(1.2em + env(safe-area-inset-bottom));
+      overflow:auto; -webkit-overflow-scrolling:touch;
+    }
+    .overlay h3{ font-size:1.32em; }
+    /* Boton de cerrar flotante sobre el arte, comodo para el pulgar */
+    .close{
+      position:absolute; top:calc(.8em + env(safe-area-inset-top)); right:.8em;
+      width:2.3em; height:2.3em; min-width:44px; min-height:44px;
+      border-radius:50%; font-size:1.05em; z-index:3;
+      background:rgba(254,251,242,.92); border:1px solid var(--border-2);
+      box-shadow:0 2px 10px rgba(31,20,16,.14);
+    }
+    .visit{ font-size:.82em; padding-top:1.3em; }
+  }
+
+  /* Telefono: dos columnas. Tres ya no entran sin que el arte se achique. */
+  @media(max-width:560px){
+    .grid{ grid-template-columns:repeat(2, minmax(0,1fr)); gap:.7em; }
+  }
+
+  /* Telefonos angostos o bajos: el titulo es el bloque mas caro, se achica
+     mas que el resto para que el texto de las fichas no pague el ajuste. */
+  @media(max-width:400px), (max-height:700px) and (max-width:820px){
+    .head{ grid-template-columns:minmax(0,1fr) 36%; }
+    h1{ font-size:min(1.92em, 6.1vw); line-height:1.06; }
+    .sub{ font-size:.9em; margin-top:.55em; }
+    .logo{ font-size:1.2em; margin-bottom:.85em; }
+    .grid{ margin-top:1em; gap:.6em; }
+    .momtest{ margin-top:.9em; padding-top:.75em; }
+    .momtest img{ height:3em; }
+  }
+
+  /* Landscape de telefono: con 390px de alto no entran dos filas de fichas,
+     asi que van todas en una sola, como en desktop. */
+  @media(orientation:landscape) and (max-height:540px){
+    .screen{ padding:.9em clamp(14px,3vw,24px); }
+    .meme{ display:none; }
+    .head{ display:block; }
+    .logo{ font-size:1.1em; margin-bottom:.5em; }
+    h1{ font-size:min(1.5em, 3.4vw); line-height:1.1; max-width:40ch; }
+    .sub{ font-size:.82em; margin-top:.35em; }
+    .grid{
+      margin-top:.8em;
+      grid-template-columns:repeat(6, minmax(0,1fr)) !important; gap:.5em;
+    }
+    .card{ border-radius:.7em; }
+    .body{ padding:.55em .6em .6em; }
+    .pitch{ font-size:.8em; line-height:1.25; }
+    .plus{ display:none; }
+    .momtest{ margin-top:.7em; padding-top:.6em; gap:.6em; }
+    .momtest img{ height:2.4em; }
+    .momtest p{ font-size:.72em; }
+    .ov-art{ height:26vh; }
   }
 
   @media(prefers-reduced-motion:reduce){
@@ -325,7 +408,7 @@
     <div class="head">
         <div class="head-text">
           <h1>Mi sueño era ser <span id="hlCuriosidad" data-hl="underline" data-hl-color="#D4612A">científico loco</span> y tener un laboratorio como el de Dexter.</h1>
-          <p class="sub">Hoy gracias a la IA voy plasmando casi toda mi curiosidad en experimentos 🔬🧫</p>
+          <p class="sub">Hoy gracias a la IA voy plasmando casi toda mi curiosidad en <span class="nw">experimentos&nbsp;🔬🧫</span></p>
         </div>
 
         <!-- El GIF va en assets/dexter-lab.gif. Si no esta, cae solo en el
@@ -870,7 +953,9 @@ function alto(){
 
 function fit(){
   setS(1);
+  screenEl.style.overflowY = 'hidden';
   if(alto() <= screenEl.clientHeight) return;
+
   let lo = 0.45, hi = 1, best = 0.45;
   for(let i = 0; i < 14; i++){
     const mid = (lo + hi) / 2;
@@ -878,6 +963,10 @@ function fit(){
     if(alto() <= screenEl.clientHeight){ best = mid; lo = mid; } else { hi = mid; }
   }
   setS(best.toFixed(4));
+
+  /* Si ni al piso de escala entra (una pantalla rarisima, o muchos
+     proyectos), que scrollee. Cortar contenido siempre es peor. */
+  if(alto() > screenEl.clientHeight + 1) screenEl.style.overflowY = 'auto';
 }
 
 /* ── Subrayado del H1 ────────────────────────────────────────────

@@ -36,7 +36,21 @@ madre de Dexter + nota del Mom Test     ← al pie, explica la regla del pitch
 
 Cada ficha es **arte + una sola frase**. Nada más: ni número, ni etiqueta, ni "ver el detalle" — repetidos seis veces no agregaban información. La única pista de que se abre es un `+` que aparece al pasar por encima (`.plus`, oculto en mobile).
 
-La grilla es `repeat(auto-fit, minmax(12em, 1fr))`: reparte sola las fichas que haya, sin dejar huecos en la última fila. Con hasta 5 entran todas en una fila; a partir de ahí arma dos.
+La grilla es `repeat(auto-fit, minmax(12em, 1fr))`: reparte sola las fichas que haya, sin dejar huecos en la última fila. Con hasta 6 entran todas en una fila.
+
+### Breakpoints
+
+La ficha **nunca** se convierte en una fila horizontal con un thumbnail al costado: así el arte queda diminuto y la grilla deja de leerse como portfolio. En todos los tamaños es arte arriba, frase abajo; lo único que cambia es cuántas columnas hay.
+
+| Ancho | Columnas | Qué más cambia |
+|---|---|---|
+| > 820px | auto-fit (6 en una fila) | el meme a la derecha del título |
+| 560–820px | 3 | el meme se achica y sube al lado del título; el `+` queda fijo y tenue, porque en touch no hay hover |
+| < 560px | 2 | |
+| < 400px o alto < 700px | 2 | el h1 se achica más que el resto: es el bloque más caro y, si paga él, el texto de las fichas queda legible |
+| landscape, alto < 540px | 6 en una fila | se oculta el meme; con 390px de alto no entran dos filas |
+
+Otros detalles táctiles: `-webkit-tap-highlight-color` transparente con un `:active` que hunde la ficha, la ✕ del detalle flotando sobre el arte con `min-width/height:44px` (el mínimo de un target táctil), y `env(safe-area-inset-*)` en el padding de `.screen`, del `.ov-body` y de la ✕.
 
 Al tocar una ficha se abre un modal centrado (`.overlay`, colgado del `<body>`) con el arte a la izquierda y el detalle a la derecha, sobre un fondo oscurecido (`.backdrop`). Mide `min(1080px, 92vw) × min(660px, 82vh)`; en mobile pasa a pantalla completa. Se cierra con la ✕, con Escape o tocando afuera.
 
@@ -51,9 +65,11 @@ Dos escalas, las dos manejadas por JS, las dos con búsqueda binaria:
 - **`--s`** (en `:root`) escala la página entera. Todo el layout está en `em` sobre el `font-size` de `.screen`, así que bajar `--s` achica todo proporcionalmente. `fit()` lo baja hasta que `.inner` entra en el alto del viewport (piso 0.45).
 - **`--so`** (en `.overlay`) hace lo mismo con el detalle abierto: `fitOverlay()` lo baja hasta que el contenido entra en el modal (piso 0.5), así nunca aparece scroll interno. Con el modal a 660px de alto hoy no necesita bajar de 1 en ningún viewport probado; si un proyecto trae mucho más texto, escala en vez de recortar.
 
+Si `fit()` llega al piso y **aun así** no entra (una pantalla rarísima, o muchos proyectos de golpe), habilita el scroll de `.screen`. Cortar contenido siempre es peor que scrollear; la premisa de la pantalla única no vale romper el contenido para sostenerla.
+
 Las dos se recalculan en `resize`. El `font-size` base ya es responsive por su cuenta (`clamp(10.5px, min(3.1vw, 1.78vh), 17px)`); `--s` es el ajuste fino encima de eso.
 
-**Consecuencia práctica:** cuantos más proyectos se sumen, más se achica todo. Con 5 o 6 fichas hay que pasar la grilla a dos filas (`grid-template-columns:repeat(3,1fr)` ya lo hace solo) y revisar que el tamaño resultante siga siendo legible.
+**Consecuencia práctica:** cuantos más proyectos se sumen, más se achica todo. Al pasar de 6 conviene revisar a mano cómo queda en mobile chico (375×667 ya está en 0.82) y, si hace falta, bajar el `minmax` de la grilla o acortar los `pitch`.
 
 ## ➕ Cómo agregar un proyecto
 
