@@ -52,7 +52,18 @@ La ficha **nunca** se convierte en una fila horizontal con un thumbnail al costa
 
 Otros detalles táctiles: `-webkit-tap-highlight-color` transparente con un `:active` que hunde la ficha, la ✕ del detalle flotando sobre el arte con `min-width/height:44px` (el mínimo de un target táctil), y `env(safe-area-inset-*)` en el padding de `.screen`, del `.ov-body` y de la ✕.
 
-Al tocar una ficha se abre un modal centrado (`.overlay`, colgado del `<body>`) con el arte a la izquierda y el detalle a la derecha, sobre un fondo oscurecido (`.backdrop`). Mide `min(1080px, 92vw) × min(660px, 82vh)`; en mobile pasa a pantalla completa. Se cierra con la ✕, con Escape o tocando afuera.
+Al tocar una ficha se abre un modal centrado (`.overlay`, colgado del `<body>`) con el arte a la izquierda y el detalle a la derecha, sobre un fondo oscurecido (`.backdrop`). Mide `min(1080px, 92vw) × min(660px, 82vh)`; en mobile pasa a pantalla completa. Se cierra con la ✕, con Escape, tocando afuera **o con el botón atrás del navegador**.
+
+### El detalle vive en el historial
+
+Abrir una ficha hace `pushState` con el slug del proyecto (`#copiloto-de-entrevistas`) y cerrarla hace `history.back()`, que consume esa entrada. **Esto no es un extra, es lo que hace que el modal funcione en mobile:** ahí ocupa toda la pantalla y el gesto natural para volver es el botón atrás — sin esto te sacaba del sitio en vez de cerrar la ficha.
+
+Dos cosas que hay que respetar si se toca esto:
+
+- **Cerrar nunca toca el DOM directo, llama a `history.back()`** y deja que el `popstate` haga el cierre visual (`cerrarUI`). Si cerrás a mano además de navegar, la entrada queda colgada y el siguiente atrás no hace nada.
+- **Entrando por link directo hay que armar el par base → detalle.** Un `replaceState` solo no deja entrada a la cual volver, y la ✕ termina sacando al visitante del sitio. Por eso el `boot()` hace `replaceState` a la URL sin hash y después `pushState` al detalle.
+
+De regalo, cada proyecto queda con URL propia y se puede compartir el link a uno solo. Un hash que no matchea ningún proyecto se ignora.
 
 Al pie hay una sola nota (`.momtest`): la madre de Dexter recortada más una línea que explica el Mom Test, la regla que gobierna el `pitch` de cada ficha. No es un footer — no lleva links, ni copyright, ni nav.
 

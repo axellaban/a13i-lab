@@ -1054,9 +1054,17 @@ function fitOverlay(){
   overlay.style.setProperty('--so', best.toFixed(4));
 }
 
-function abrir(i){
+/* El detalle entra en el historial. En mobile ocupa toda la pantalla y el
+   gesto natural para volver es el boton atras del navegador: sin esto te
+   sacaba del sitio en vez de cerrar la ficha. De paso cada proyecto queda
+   con su propia URL, asi se puede compartir el link a uno solo. */
+const slug = (t) => String(t).normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+  .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+
+let enHistorial = false;
+
+function abrirUI(i){
   const p = PROYECTOS[i];
-  if(!p) return;
   overlay.innerHTML = overlayHTML(p, i);
   overlay.classList.add('is-on');
   backdrop.classList.add('is-on');
@@ -1066,10 +1074,9 @@ function abrir(i){
   fitOverlay();
   const c = overlay.querySelector('.close');
   if(c) c.focus();
-  if(window.gtag) gtag('event', 'lab_proyecto_abierto', { proyecto: p.titulo });
 }
 
-function cerrar(){
+function cerrarUI(){
   if(abierta < 0) return;
   overlay.classList.remove('is-on');
   backdrop.classList.remove('is-on');
@@ -1079,6 +1086,42 @@ function cerrar(){
   abierta = -1;
   if(face) face.focus();
 }
+
+function abrir(i){
+  const p = PROYECTOS[i];
+  if(!p) return;
+  /* Cambiar de ficha con una ya abierta reemplaza la entrada, no apila otra:
+     si no, atras te haria recorrer todas las que miraste. */
+  const url = '#' + slug(p.titulo);
+  try{
+    if(enHistorial) history.replaceState({ lab: i }, '', url);
+    else { history.pushState({ lab: i }, '', url); enHistorial = true; }
+  }catch(e){ /* file:// y casos raros: sigue andando sin historial */ }
+  abrirUI(i);
+  if(window.gtag) gtag('event', 'lab_proyecto_abierto', { proyecto: p.titulo });
+}
+
+function cerrar(){
+  if(abierta < 0) return;
+  if(enHistorial){
+    enHistorial = false;
+    history.back();   // el popstate hace el cierre visual
+    return;
+  }
+  cerrarUI();
+}
+
+window.addEventListener('popstate', (e) => {
+  const i = e.state && typeof e.state.lab === 'number' ? e.state.lab : -1;
+  if(i >= 0 && PROYECTOS[i]){
+    /* Volvio con "adelante" a una ficha */
+    enHistorial = true;
+    abrirUI(i);
+  } else {
+    enHistorial = false;
+    cerrarUI();
+  }
+});
 
 overlay.addEventListener('click', (e) => {
   if(e.target.closest('.close')) cerrar();
@@ -1213,6 +1256,22 @@ function relayout(){
 function boot(){
   fit();
   hlSetup();
+  /* Si el link venia apuntando a un proyecto, se abre solo */
+  const h = decodeURIComponent((location.hash || '').slice(1));
+  if(h){
+    const i = PROYECTOS.findIndex(p => slug(p.titulo) === h);
+    if(i >= 0){
+      /* Entrando por link, replaceState solo no alcanza: no deja entrada a la
+         cual volver, y la X terminaba sacandote del sitio. Se arma el par
+         base -> detalle, asi cerrar vuelve al lab y no al sitio anterior. */
+      try{
+        history.replaceState(null, '', location.pathname + location.search);
+        history.pushState({ lab: i }, '', '#' + h);
+        enHistorial = true;
+      }catch(e){ enHistorial = false; }
+      abrirUI(i);
+    }
+  }
 }
 
 (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve())
