@@ -99,7 +99,12 @@ Mismos tokens que `a13i-accelerator`. Tokens en `:root`, nunca hardcodear hex.
 
 ### El meme
 
-El encabezado tiene un recuadro con un GIF del laboratorio de Dexter, en `assets/dexter-lab.gif`. **Si el archivo no está, el `onerror` del `<img>` muestra un dibujo propio de matraces** (inline en el HTML, clase `.meme-fb`) y la página no se ve rota. Es material de Cartoon Network / Warner: uso de meme, decisión de Axel.
+El encabezado tiene un recuadro con un GIF del laboratorio de Dexter. La fuente sale de la constante `MEME_SRC`, arriba del script, y acepta las dos formas:
+
+- un archivo del repo: `'/assets/dexter-lab.gif'` (el default)
+- una URL directa a un gif externo: `'https://media.giphy.com/media/xxxx/giphy.gif'`
+
+**Si no carga ninguna, el `onerror` del `<img>` muestra un dibujo propio de matraces** (inline en el HTML, clase `.meme-fb`) y la página no se ve rota. Es material de Cartoon Network / Warner: uso de meme, decisión de Axel.
 
 ### Subrayado del H1
 
@@ -132,6 +137,6 @@ Push a `main` → auto-deploy en Vercel.
 
 1. Capturas reales de los tres proyectos, para reemplazar el arte generado (campo `imagen`).
 2. `og:image` propio del lab (hoy reusa el genérico de accelerator).
-3. El GIF: dejar `assets/dexter-lab.gif` en el repo (hoy cae en el dibujo de fallback).
+3. El GIF: dejar `assets/dexter-lab.gif` en el repo o apuntar `MEME_SRC` a una URL externa (hoy cae en el dibujo de fallback).
 4. Universo Loro: Axel mencionó cuatro productos y hay ficha para tres (Copiloto de Entrevistas, Envía un Lorito, Loro Fitness). Falta el cuarto.
 5. Confirmar el dominio final.

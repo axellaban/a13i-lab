@@ -647,13 +647,27 @@ function overlayHTML(p, i){
     '</div>';
 }
 
-/* Si todavia no esta el gif en assets/, la ficha cae en el dibujo. */
+/* ═══════════════════════════════════════════════════════════════
+   EL MEME — el gif del laboratorio de Dexter.
+   Dos formas de ponerlo, cualquiera de las dos sirve:
+
+   1. Dejar el archivo en el repo:  assets/dexter-lab.gif
+   2. Pegar acá la URL directa del gif (Giphy, Tenor, donde sea).
+      Tiene que terminar en .gif y ser el archivo, no la pagina:
+      'https://media.giphy.com/media/xxxxx/giphy.gif'
+
+   Si no carga ninguna de las dos, la ficha muestra el dibujo de
+   matraces y la pagina no se ve rota.
+   ═══════════════════════════════════════════════════════════════ */
+const MEME_SRC = '/assets/dexter-lab.gif';
+
 (function(){
   const fig = document.getElementById('meme');
   const img = document.getElementById('memeImg');
   if(!fig || !img) return;
   const fallback = () => fig.classList.add('is-fb');
   img.addEventListener('error', fallback);
+  if(MEME_SRC && img.getAttribute('src') !== MEME_SRC) img.src = MEME_SRC;
   if(img.complete && img.naturalWidth === 0) fallback();
 })();
 
