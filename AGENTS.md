@@ -11,4 +11,4 @@ La documentación técnica completa está consolidada en:
 
 ## Regla corta
 
-El listado de proyectos sale del array `PROYECTOS` dentro de `index.html`. Para sumar o editar un proyecto se toca ese array y nada más.
+El listado de proyectos sale del array `PROYECTOS` dentro de `index.html`. Para sumar o editar un proyecto se toca ese array y nada más. La página es deliberadamente mínima: logo, título, subtítulo y listado. No agregarle nav, filtros, CTA ni footer.

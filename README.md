@@ -1,8 +1,8 @@
 # A13I Lab
 
-Landing del laboratorio de IA aplicada de A13I: qué experimentos y proyectos se están probando, en qué estado está cada uno y con qué se armó.
+Landing del laboratorio de Axel Laban: experimentos, MVP funcionales y productos digitales.
 
-Sitio estático de un solo archivo (`index.html`), sin build ni dependencias de compilación. Deploy en Vercel.
+Una sola página estática (`index.html`), sin build ni dependencias de compilación. Deploy en Vercel.
 
 ## Correrlo local
 
@@ -13,22 +13,18 @@ python3 -m http.server 8080
 
 ## Agregar un proyecto
 
-Todo el listado sale del array `PROYECTOS`, en el `<script>` al final de `index.html`. Se agrega un objeto y listo — las tarjetas, los filtros y los contadores del hero se generan solos:
+Todo el listado sale del array `PROYECTOS`, en el `<script>` al final de `index.html`. Se agrega un objeto y listo — la entrada y su numeración se generan solas:
 
 ```js
 {
-  titulo:  'Agente de posventa por WhatsApp',
-  resumen: 'Qué hace y qué resolvió, en una o dos líneas.',
-  estado:  'produccion',                      // produccion | curso | experimento | archivado
-  fecha:   '2026',
-  metrica: '85% sin intervención humana',     // opcional
-  stack:   ['RAG', 'HITL', 'n8n'],            // opcional
-  link:    'https://…'                        // opcional: hace clickeable la tarjeta
+  titulo: 'Universo Loro',
+  lead:   'Una o dos líneas de qué es.',   // opcional
+  items: [                                  // opcional
+    { n: 'Sub-producto', d: 'Qué es, en una línea.' },
+    { n: 'Otra versión', bullets: ['Detalle uno.', 'Detalle dos.'] }
+  ],
+  link: 'https://…'                         // opcional: hace clickeable la entrada
 }
 ```
 
 Detalle completo de campos, sistema de diseño y convenciones: [CLAUDE.md](./CLAUDE.md).
-
-## Estado
-
-Los proyectos que están hoy en el array son **contenido de muestra** para ver el layout poblado. Falta reemplazarlos por los reales.
