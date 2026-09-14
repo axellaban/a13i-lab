@@ -219,6 +219,24 @@ No hay medición real del consumo de Axel en ningún lado, así que se estima de
 
 **Sanity check contra lo que Axel recuerda:** dice que Copiloto + Simulacro fue lo más caro (≈49 M juntos, 308 commits en 6 semanas) y que el Dashboard lo hizo mucho más rápido (17 M, 67 commits). Los números dan lo mismo que su memoria.
 
+## 💵 De dónde sale el costo en dólares
+
+`costo` son los tokens estimados valuados a **precio de lista de la API de Anthropic**. No es lo que Axel pagó: si trabajó con suscripción (Claude Code / Max) pagó un abono fijo, no por token. Por eso la etiqueta dice "Costo a precio de API" y no "lo que gasté".
+
+Precios por millón de tokens:
+
+| Modelo | Input | Output | Lectura de caché |
+|---|---|---|---|
+| Opus 5 | $5 | $25 | $0,50 (0,1×) |
+| Sonnet 5 | $2 | $10 | $0,20 (0,1×) |
+| Fable 5.1 | $10 | $50 | $0,25 (0,025×) |
+
+**Lo que domina el número no es el precio, es la caché.** La mezcla sale de la única medición real que hay (el README de `transformer-architecture`): **96,7% lectura de caché, 2,9% input sin cachear, 0,47% salida**. Con esa mezcla, un millón de tokens totales cuesta US$ 0,75 en Opus 5, US$ 0,30 en Sonnet 5 y US$ 0,77 en Fable 5.1 — Fable termina casi igual que Opus porque su caché es 4× más barata y compensa su input más caro.
+
+La diferencia es enorme: Copiloto son ~27 M de tokens, que **sin caché** serían US$ 135 en Opus; con la mezcla medida son ~US$ 16.
+
+Los dos proyectos de GPT-6-Astra **no llevan costo**: es un modelo de OpenAI y no hay precio que se pueda verificar desde acá. Mejor no poner número que poner uno inventado.
+
 ## 📚 De dónde salen las descripciones
 
 Las de los cuatro productos del Universo Loro están escritas leyendo el código, no la landing:

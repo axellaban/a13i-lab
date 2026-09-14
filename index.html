@@ -284,7 +284,7 @@
   .mleg span{ display:inline-flex; align-items:center; gap:.4em; }
   .mleg em{ width:.5em; height:.5em; border-radius:50%; font-style:normal; flex-shrink:0; }
   .mleg b{ color:var(--text); font-weight:600; }
-  .tech-row{ display:flex; flex-wrap:wrap; gap:.5em 2.2em; }
+  .tech-row{ display:flex; flex-wrap:wrap; gap:.5em 1.9em; }
   .tech-nota{ font-size:.78em; line-height:1.45; color:var(--faint); max-width:62ch; }
   .tech-cel{ display:flex; flex-direction:column; gap:.2em; min-width:0; }
   .tech-l{
@@ -755,6 +755,7 @@ const ART = {
      tech:    string[]  opcional — la tecnologia clave, 2 o 3 palabras
      commits: string    opcional — commits del repo, el indicador visible
      tokens:  string    opcional — estimacion, la pagina la marca como tal
+     costo:   string    opcional — los tokens a precio de lista de la API
      nota:    string    opcional — aclaracion al pie (origen, creditos)
      prompts: string    opcional — solo si se hizo en uno o dos prompts
      link:    string    opcional
@@ -769,6 +770,7 @@ const PROYECTOS = [
     tech: ['Transcripción en vivo', 'Streaming LLM'],
     commits: '169',
     tokens: '~27 M',
+    costo: '~US$ 16',
     familia: 'Universo Loro',
     pitch: 'Te sopla qué responder mientras te hacen una entrevista.',
     art: 'copiloto',
@@ -790,6 +792,7 @@ const PROYECTOS = [
     tech: ['Transcripción en vivo', 'Voz sintética', 'Visión'],
     commits: '139',
     tokens: '~22 M',
+    costo: '~US$ 12',
     familia: 'Universo Loro',
     pitch: 'Practicás una entrevista con una IA y te corrige después.',
     art: 'simulacro',
@@ -811,6 +814,7 @@ const PROYECTOS = [
     tech: ['Geolocalización', 'Mapas', 'Notificaciones push'],
     commits: '84',
     tokens: '~18 M',
+    costo: '~US$ 11',
     familia: 'Universo Loro',
     pitch: 'Mandás un mensaje y un pájaro lo lleva volando, lento.',
     art: 'lorito',
@@ -851,6 +855,7 @@ const PROYECTOS = [
     tech: ['Transcripción en vivo', 'Tiempo real', 'Fact checking'],
     commits: '67',
     tokens: '~17 M',
+    costo: '~US$ 10',
     pitch: 'Una IA escucha a quien presenta y lo puntúa.',
     art: 'eday',
     items: [
@@ -937,6 +942,7 @@ function fichaTecnica(p){
   if(p.tech && p.tech.length) celdas.push({ l:'Tecnología', v:p.tech.join(' · ') });
   if(p.commits) celdas.push({ l:'Commits', v:p.commits });
   if(p.tokens) celdas.push({ l:'Tokens <span class="mt-aprox">estimados</span>', v:p.tokens });
+  if(p.costo) celdas.push({ l:'Costo <span class="mt-aprox">a precio de API</span>', v:p.costo });
   if(p.prompts) celdas.push({ l:'Prompts', v:p.prompts });
 
   const modelos = (p.modelos && p.modelos.length) ? barraModelos(p.modelos) : '';
