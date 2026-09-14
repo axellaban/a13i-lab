@@ -284,7 +284,12 @@
   .mleg span{ display:inline-flex; align-items:center; gap:.4em; }
   .mleg em{ width:.5em; height:.5em; border-radius:50%; font-style:normal; flex-shrink:0; }
   .mleg b{ color:var(--text); font-weight:600; }
-  .tech-row{ display:flex; flex-wrap:wrap; gap:.5em 1.9em; }
+  /* Grilla y no flex: con cuatro celdas el flex las parte 3+1 y queda
+     desbalanceado. Asi reparten parejo, como una ficha de especificaciones. */
+  .tech-row{
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(10.5em, 1fr));
+    gap:.8em 1.6em; align-items:start;
+  }
   .tech-nota{ font-size:.78em; line-height:1.45; color:var(--faint); max-width:62ch; }
   .tech-cel{ display:flex; flex-direction:column; gap:.2em; min-width:0; }
   .tech-l{
@@ -377,7 +382,7 @@
     }
     .visit{ font-size:.82em; padding-top:.2em; }
     .tech{ gap:.7em; padding:.7em 0 .8em; }
-    .tech-row{ gap:.5em 1.4em; }
+    .tech-row{ grid-template-columns:repeat(auto-fit, minmax(8.5em, 1fr)); gap:.7em 1.1em; }
   }
 
   /* Telefono: dos columnas. Tres ya no entran sin que el arte se achique. */
@@ -753,9 +758,11 @@ const ART = {
      items:   [{ n, d, bullets[] }]   opcional — sub-productos o versiones
      modelos: [{n,p}]   opcional — reparto de modelos, p en porcentaje
      tech:    string[]  opcional — la tecnologia clave, 2 o 3 palabras
-     commits: string    opcional — commits del repo, el indicador visible
+     ritmo:   string    opcional — commits y dias activos, los dos de git
      tokens:  string    opcional — estimacion, la pagina la marca como tal
-     costo:   string    opcional — los tokens a precio de lista de la API
+     costo:   string    opcional — los tokens valuados a precio de lista de
+                        la API. Se muestra como "Equivalente en API": es una
+                        valuacion, no lo que se pago.
      nota:    string    opcional — aclaracion al pie (origen, creditos)
      prompts: string    opcional — solo si se hizo en uno o dos prompts
      link:    string    opcional
@@ -768,7 +775,7 @@ const PROYECTOS = [
     titulo: 'Copiloto de Entrevistas',
     modelos: [{ n:'Opus 5', p:50 }, { n:'Sonnet 5', p:35 }, { n:'Fable 5.1', p:15 }],
     tech: ['Transcripción en vivo', 'Streaming LLM'],
-    commits: '169',
+    ritmo: '169 commits en 20 días',
     tokens: '~27 M',
     costo: '~US$ 16',
     familia: 'Universo Loro',
@@ -790,7 +797,7 @@ const PROYECTOS = [
     titulo: 'Simulacro de Entrevistas',
     modelos: [{ n:'Opus 5', p:60 }, { n:'Sonnet 5', p:40 }],
     tech: ['Transcripción en vivo', 'Voz sintética', 'Visión'],
-    commits: '139',
+    ritmo: '139 commits en 12 días',
     tokens: '~22 M',
     costo: '~US$ 12',
     familia: 'Universo Loro',
@@ -812,7 +819,7 @@ const PROYECTOS = [
     titulo: 'Envía un Lorito',
     modelos: [{ n:'Opus 5', p:50 }, { n:'Sonnet 5', p:35 }, { n:'Fable 5.1', p:15 }],
     tech: ['Geolocalización', 'Mapas', 'Notificaciones push'],
-    commits: '84',
+    ritmo: '84 commits en 10 días',
     tokens: '~18 M',
     costo: '~US$ 11',
     familia: 'Universo Loro',
@@ -835,7 +842,7 @@ const PROYECTOS = [
     titulo: 'Loro Run',
     modelos: [{ n:'GPT-6-Astra', p:100 }],
     tech: ['Computer Vision', 'Pose estimation', '3D en el navegador'],
-    commits: '4',
+    ritmo: '4 commits en 2 días',
     tokens: '~800 k',
     prompts: '1',
     familia: 'Universo Loro',
@@ -853,7 +860,7 @@ const PROYECTOS = [
     titulo: 'Dashboard eCommerce Day 2026',
     modelos: [{ n:'Opus 5', p:60 }, { n:'Sonnet 5', p:40 }],
     tech: ['Transcripción en vivo', 'Tiempo real', 'Fact checking'],
-    commits: '67',
+    ritmo: '67 commits en 13 días',
     tokens: '~17 M',
     costo: '~US$ 10',
     pitch: 'Una IA escucha a quien presenta y lo puntúa.',
@@ -874,7 +881,7 @@ const PROYECTOS = [
     titulo: 'Arquitectura Transformer',
     modelos: [{ n:'GPT-6-Astra', p:100 }],
     tech: ['3D / WebGL', 'Blender'],
-    commits: '7',
+    ritmo: '7 commits en 1 día',
     tokens: '~1 M',
     nota: 'Fork del proyecto de Peter Gostev, construido con GPT-6-Astra en Codex — esa sesión registró 83,7 M de tokens medidos hasta publicarse. Lo de acá encima es la traducción al español, la narración y una página de diagnóstico.',
     pitch: 'En 3D: cómo cambió la IA por dentro desde 2018.',
@@ -938,12 +945,14 @@ function barraModelos(modelos){
 }
 
 function fichaTecnica(p){
+  /* De lo medido a lo estimado. La credibilidad se gana en ese orden:
+     primero lo que sale de git, despues lo que se infiere de eso. */
   const celdas = [];
   if(p.tech && p.tech.length) celdas.push({ l:'Tecnología', v:p.tech.join(' · ') });
-  if(p.commits) celdas.push({ l:'Commits', v:p.commits });
-  if(p.tokens) celdas.push({ l:'Tokens <span class="mt-aprox">estimados</span>', v:p.tokens });
-  if(p.costo) celdas.push({ l:'Costo <span class="mt-aprox">a precio de API</span>', v:p.costo });
+  if(p.ritmo) celdas.push({ l:'Ritmo', v:p.ritmo });
   if(p.prompts) celdas.push({ l:'Prompts', v:p.prompts });
+  if(p.tokens) celdas.push({ l:'Tokens <span class="mt-aprox">estimados</span>', v:p.tokens });
+  if(p.costo) celdas.push({ l:'Equivalente <span class="mt-aprox">en API</span>', v:p.costo });
 
   const modelos = (p.modelos && p.modelos.length) ? barraModelos(p.modelos) : '';
   const fila = celdas.length

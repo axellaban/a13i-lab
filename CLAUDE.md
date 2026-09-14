@@ -99,7 +99,8 @@ Reglas:
 - `items` admite `n`, `d` y `bullets`. Se pueden combinar o usar sueltos.
 - `familia` agrupa productos que son parte de algo más grande sin necesidad de una ficha paraguas: los cuatro productos del Universo Loro tienen ficha propia y comparten esa etiqueta, que se ve en el detalle.
 - El label del link se deriva de la URL (se le saca el protocolo y la barra final).
-- `modelos` / `tech` / `tokens` / `prompts` arman la ficha técnica al pie del detalle: una barra con el reparto de modelos, y debajo la tecnología clave, los tokens y, si fue de uno o dos prompts, cuántos.
+- `modelos` / `tech` / `ritmo` / `tokens` / `costo` arman la ficha técnica al pie del detalle: una barra con el reparto de modelos y debajo una grilla de celdas. **El orden va de lo medido a lo estimado** — tecnología y ritmo salen de los repos, tokens y equivalente se infieren de eso. La credibilidad se gana en ese orden: primero lo que se puede verificar, y recién ahí la estimación.
+- `ritmo` junta los dos números exactos que da git: commits y días activos. Es el dato más legible de la ficha — cuando Axel describe un proyecto no dice "27 M de tokens", dice "estuve dos semanas".
 - **`modelos` es de memoria de Axel, y la página lo marca "aprox."** El patrón que él describe: casi siempre Opus 5, con Sonnet 5 alrededor del 40%, y Sonnet nunca falta cuando hay algún modelo de Claude. Simulacro y el Dashboard son solo Opus + Sonnet (sin Fable). Loro Run y Arquitectura Transformer son 100% GPT-6-Astra. El reparto exacto donde entra Fable (15%) es una suposición, no un dato que él haya dado.
 - **`tokens` es una estimación y la página lo dice** (la etiqueta es "Tokens estimados"). Ver abajo de dónde sale.
 - Todo el contenido pasa por `esc()` antes de entrar al DOM. No romper eso al agregar campos.
@@ -211,7 +212,7 @@ No hay medición real del consumo de Axel en ningún lado, así que se estima de
 | `juego-fitness` | 4 | 2 | 1.199 | 13 → 14 sep |
 | `transformer-architecture` | 9 (2 son el fork) | 2 | 1.008 propias | 13 sep |
 
-`loro` se reparte entre sus dos productos por los commits que tocan los archivos de cada uno: Copiloto 106, Simulacro 88, y los 114 restantes (lib, config, estilos compartidos) se prorratean 55/45.
+`loro` se reparte entre sus dos productos por los commits que tocan los archivos de cada uno: Copiloto 106, Simulacro 88, y los 114 restantes (lib, config, estilos compartidos) se prorratean 55/45. Los días activos se cuentan por fechas distintas de esos mismos commits: Copiloto 20 días (10 jul → 11 ago), Simulacro 12 (20 jul → 11 ago).
 
 **La fórmula:** `commits × 120k + churn × 300`. Cada commit es una ronda con el agente, y lo que más pesa en una ronda no es el código que sale sino el contexto que entra una y otra vez.
 
@@ -221,7 +222,9 @@ No hay medición real del consumo de Axel en ningún lado, así que se estima de
 
 ## 💵 De dónde sale el costo en dólares
 
-`costo` son los tokens estimados valuados a **precio de lista de la API de Anthropic**. No es lo que Axel pagó: si trabajó con suscripción (Claude Code / Max) pagó un abono fijo, no por token. Por eso la etiqueta dice "Costo a precio de API" y no "lo que gasté".
+`costo` son los tokens estimados valuados a **precio de lista de la API de Anthropic**. No es lo que Axel pagó: trabajó con suscripciones, que son un abono fijo y no cobran por token. Por eso la etiqueta en la página es **"Equivalente en API"** y no "Costo": es una valuación, no un gasto, y la palabra elegida no arrastra la implicación de haberlo pagado.
+
+La página **no aclara nada sobre suscripciones**, y es deliberado: una etiqueta que ya es correcta no necesita defensa, y agregarla le daría entidad a una pregunta que nadie se hace. El precio de suscripción además mide el plan, no el trabajo — dividirlo entre proyectos daría un número arbitrario que no informa nada.
 
 Precios por millón de tokens:
 
@@ -236,6 +239,8 @@ Precios por millón de tokens:
 La diferencia es enorme: Copiloto son ~27 M de tokens, que **sin caché** serían US$ 135 en Opus; con la mezcla medida son ~US$ 16.
 
 Los dos proyectos de GPT-6-Astra **no llevan costo**: es un modelo de OpenAI y no hay precio que se pueda verificar desde acá. Mejor no poner número que poner uno inventado.
+
+**Dónde está lo flojo de la ficha, por si alguien la discute:** los precios son exactos (publicados) y el ritmo sale de git, así que esos dos no se discuten. Los tokens son inferidos, pero de datos reales. El eslabón más débil es **el reparto de modelos**: sale de la memoria de Axel, y el 15% de Fable en Copiloto y Envía un Lorito es directamente una suposición. Está marcado "aprox.", pero si alguna vez hay que recortar la ficha, ese es el primer dato que sale — no el dólar.
 
 ## 📚 De dónde salen las descripciones
 
