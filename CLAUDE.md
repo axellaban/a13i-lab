@@ -17,6 +17,9 @@ a13i-lab/
 ├── index.html      # la página entera: estilos en <head>, lógica al final del <body>
 ├── vercel.json     # cleanUrls + cache + headers de seguridad
 ├── assets/
+│   ├── exploding-chemicals-dexter.gif   # el meme del encabezado
+│   ├── mom.png        # la madre de Dexter, recortada — la usa la nota del Mom Test
+│   ├── mom.jpg        # el original que subió Axel; de acá salió el .png, la página no lo usa
 │   └── og-image.jpg   # copiado de accelerator — pendiente uno propio del lab
 ├── favicon/        # mismo set que accelerator
 └── README.md
@@ -28,6 +31,7 @@ a13i-lab/
 logo A13I_LAB
 título + bajada   |   meme        ← dos columnas en desktop, apiladas en mobile
 [ 01 ] [ 02 ] [ 03 ] [ 04 ] [ 05 ]      ← grilla portfolio
+madre de Dexter + nota del Mom Test     ← al pie, explica la regla del pitch
 ```
 
 Cada ficha es **arte + una sola frase**. Nada más: ni número, ni etiqueta, ni "ver el detalle" — repetidos seis veces no agregaban información. La única pista de que se abre es un `+` que aparece al pasar por encima (`.plus`, oculto en mobile).
@@ -35,6 +39,8 @@ Cada ficha es **arte + una sola frase**. Nada más: ni número, ni etiqueta, ni 
 La grilla es `repeat(auto-fit, minmax(12em, 1fr))`: reparte sola las fichas que haya, sin dejar huecos en la última fila. Con hasta 5 entran todas en una fila; a partir de ahí arma dos.
 
 Al tocar una ficha se abre un modal centrado (`.overlay`, colgado del `<body>`) con el arte a la izquierda y el detalle a la derecha, sobre un fondo oscurecido (`.backdrop`). Mide `min(1080px, 92vw) × min(660px, 82vh)`; en mobile pasa a pantalla completa. Se cierra con la ✕, con Escape o tocando afuera.
+
+Al pie hay una sola nota (`.momtest`): la madre de Dexter recortada más una línea que explica el Mom Test, la regla que gobierna el `pitch` de cada ficha. No es un footer — no lleva links, ni copyright, ni nav.
 
 No hay header fijo, nav, filtros ni footer. Agregar cualquiera de esas cosas rompe la premisa de la pantalla única.
 
@@ -109,6 +115,8 @@ El encabezado tiene un recuadro con un GIF del laboratorio de Dexter. La fuente 
 
 - un archivo del repo: `'/assets/exploding-chemicals-dexter.gif'` (el que está hoy, 220×165, justo la proporción 4:3 del recuadro)
 - una URL directa a un gif externo: `'https://media.giphy.com/media/xxxx/giphy.gif'`
+
+La nota del Mom Test usa `assets/mom.png`. El original que subió Axel (`mom.jpg`) venía con el tablero de ajedrez de la transparencia horneado en los píxeles, porque JPEG no soporta alpha. El `.png` se generó sacándolo con un flood fill desde los bordes: el tablero rodea a la figura y el blanco de la camisa queda encerrado por el contorno negro, así que no se toca. Si alguna vez hay que rehacerlo, ese es el método — un color-key directo le haría agujeros a la ropa.
 
 **Si no carga ninguna, el `onerror` del `<img>` muestra un dibujo propio de matraces** (inline en el HTML, clase `.meme-fb`) y la página no se ve rota. Es material de Cartoon Network / Warner: uso de meme, decisión de Axel.
 
