@@ -285,6 +285,7 @@
   .mleg em{ width:.5em; height:.5em; border-radius:50%; font-style:normal; flex-shrink:0; }
   .mleg b{ color:var(--text); font-weight:600; }
   .tech-row{ display:flex; flex-wrap:wrap; gap:.5em 2.2em; }
+  .tech-nota{ font-size:.78em; line-height:1.45; color:var(--faint); max-width:62ch; }
   .tech-cel{ display:flex; flex-direction:column; gap:.2em; min-width:0; }
   .tech-l{
     font-family:var(--mono); font-size:.62em; font-weight:700;
@@ -752,7 +753,9 @@ const ART = {
      items:   [{ n, d, bullets[] }]   opcional — sub-productos o versiones
      modelos: [{n,p}]   opcional — reparto de modelos, p en porcentaje
      tech:    string[]  opcional — la tecnologia clave, 2 o 3 palabras
+     commits: string    opcional — commits del repo, el indicador visible
      tokens:  string    opcional — estimacion, la pagina la marca como tal
+     nota:    string    opcional — aclaracion al pie (origen, creditos)
      prompts: string    opcional — solo si se hizo en uno o dos prompts
      link:    string    opcional
      art:     clave de ART            arte generado de la ficha
@@ -764,7 +767,8 @@ const PROYECTOS = [
     titulo: 'Copiloto de Entrevistas',
     modelos: [{ n:'Opus 5', p:50 }, { n:'Sonnet 5', p:35 }, { n:'Fable 5.1', p:15 }],
     tech: ['Transcripción en vivo', 'Streaming LLM'],
-    tokens: '~3 M',
+    commits: '169',
+    tokens: '~27 M',
     familia: 'Universo Loro',
     pitch: 'Te sopla qué responder mientras te hacen una entrevista.',
     art: 'copiloto',
@@ -784,7 +788,8 @@ const PROYECTOS = [
     titulo: 'Simulacro de Entrevistas',
     modelos: [{ n:'Opus 5', p:60 }, { n:'Sonnet 5', p:40 }],
     tech: ['Transcripción en vivo', 'Voz sintética', 'Visión'],
-    tokens: '~2,5 M',
+    commits: '139',
+    tokens: '~22 M',
     familia: 'Universo Loro',
     pitch: 'Practicás una entrevista con una IA y te corrige después.',
     art: 'simulacro',
@@ -804,7 +809,8 @@ const PROYECTOS = [
     titulo: 'Envía un Lorito',
     modelos: [{ n:'Opus 5', p:50 }, { n:'Sonnet 5', p:35 }, { n:'Fable 5.1', p:15 }],
     tech: ['Geolocalización', 'Mapas', 'Notificaciones push'],
-    tokens: '~6 M',
+    commits: '84',
+    tokens: '~18 M',
     familia: 'Universo Loro',
     pitch: 'Mandás un mensaje y un pájaro lo lleva volando, lento.',
     art: 'lorito',
@@ -825,7 +831,8 @@ const PROYECTOS = [
     titulo: 'Loro Run',
     modelos: [{ n:'GPT-6-Astra', p:100 }],
     tech: ['Computer Vision', 'Pose estimation', '3D en el navegador'],
-    tokens: '~120 k',
+    commits: '4',
+    tokens: '~800 k',
     prompts: '1',
     familia: 'Universo Loro',
     pitch: 'Jugás moviendo el cuerpo: la cámara te lee los movimientos.',
@@ -842,7 +849,8 @@ const PROYECTOS = [
     titulo: 'Dashboard eCommerce Day 2026',
     modelos: [{ n:'Opus 5', p:60 }, { n:'Sonnet 5', p:40 }],
     tech: ['Transcripción en vivo', 'Tiempo real', 'Fact checking'],
-    tokens: '~3,5 M',
+    commits: '67',
+    tokens: '~17 M',
     pitch: 'Una IA escucha a quien presenta y lo puntúa.',
     art: 'eday',
     items: [
@@ -861,8 +869,9 @@ const PROYECTOS = [
     titulo: 'Arquitectura Transformer',
     modelos: [{ n:'GPT-6-Astra', p:100 }],
     tech: ['3D / WebGL', 'Blender'],
-    tokens: '~200 k',
-    prompts: '1',
+    commits: '7',
+    tokens: '~1 M',
+    nota: 'Fork del proyecto de Peter Gostev, construido con GPT-6-Astra en Codex — esa sesión registró 83,7 M de tokens medidos hasta publicarse. Lo de acá encima es la traducción al español, la narración y una página de diagnóstico.',
     pitch: 'En 3D: cómo cambió la IA por dentro desde 2018.',
     art: 'astra',
     lead: 'Render 3D que compara el paper de DeepSeek v4.1 Flash con el modelo origen de los transformers de 2018.',
@@ -926,6 +935,7 @@ function barraModelos(modelos){
 function fichaTecnica(p){
   const celdas = [];
   if(p.tech && p.tech.length) celdas.push({ l:'Tecnología', v:p.tech.join(' · ') });
+  if(p.commits) celdas.push({ l:'Commits', v:p.commits });
   if(p.tokens) celdas.push({ l:'Tokens <span class="mt-aprox">estimados</span>', v:p.tokens });
   if(p.prompts) celdas.push({ l:'Prompts', v:p.prompts });
 
@@ -935,8 +945,9 @@ function fichaTecnica(p){
         '<span class="tech-cel"><span class="tech-l">' + c.l + '</span>' +
         '<span class="tech-v">' + esc(c.v) + '</span></span>').join('') + '</div>'
     : '';
+  const nota = p.nota ? '<p class="tech-nota">' + esc(p.nota) + '</p>' : '';
 
-  return (modelos || fila) ? '<div class="tech">' + modelos + fila + '</div>' : '';
+  return (modelos || fila || nota) ? '<div class="tech">' + modelos + fila + nota + '</div>' : '';
 }
 
 function overlayHTML(p, i){

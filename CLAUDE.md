@@ -101,7 +101,7 @@ Reglas:
 - El label del link se deriva de la URL (se le saca el protocolo y la barra final).
 - `modelos` / `tech` / `tokens` / `prompts` arman la ficha técnica al pie del detalle: una barra con el reparto de modelos, y debajo la tecnología clave, los tokens y, si fue de uno o dos prompts, cuántos.
 - **`modelos` es de memoria de Axel, y la página lo marca "aprox."** El patrón que él describe: casi siempre Opus 5, con Sonnet 5 alrededor del 40%, y Sonnet nunca falta cuando hay algún modelo de Claude. Simulacro y el Dashboard son solo Opus + Sonnet (sin Fable). Loro Run y Arquitectura Transformer son 100% GPT-6-Astra. El reparto exacto donde entra Fable (15%) es una suposición, no un dato que él haya dado.
-- **`tokens` es una estimación y la página lo dice** (la etiqueta es "Tokens estimados"): sale del tamaño del código del repo por un multiplicador según cómo se construyó — iterando con un agente se re-lee el proyecto muchas veces, un solo prompt no. No hay medición real de consumo en ningún lado, así que no presentarlo como dato duro.
+- **`tokens` es una estimación y la página lo dice** (la etiqueta es "Tokens estimados"). Ver abajo de dónde sale.
 - Todo el contenido pasa por `esc()` antes de entrar al DOM. No romper eso al agregar campos.
 
 ## 🖼️ El arte de las fichas
@@ -199,6 +199,26 @@ Push a `main` → auto-deploy en Vercel.
 2. `og:image` propio del lab (hoy reusa el genérico de accelerator).
 3. Confirmar el dominio final.
 
+## 🔢 De dónde salen los tokens
+
+No hay medición real del consumo de Axel en ningún lado, así que se estima desde la historia de cada repo. Los datos, medidos con `git log` sobre la historia completa (ojo: los clones con `--depth 1` mienten, hay que hacer `fetch --depth=1000`):
+
+| Repo | Commits | Días activos | Churn (líneas) | Período |
+|---|---|---|---|---|
+| `loro` (Copiloto + Simulacro) | 308 | 24 | 40.581 | 10 jul → 21 ago |
+| `enviaunloro` | 84 | 10 | 25.473 | 26 ago → 9 sep |
+| `eday` | 67 | 13 | 28.847 | 6 jun → 27 ago |
+| `juego-fitness` | 4 | 2 | 1.199 | 13 → 14 sep |
+| `transformer-architecture` | 9 (2 son el fork) | 2 | 1.008 propias | 13 sep |
+
+`loro` se reparte entre sus dos productos por los commits que tocan los archivos de cada uno: Copiloto 106, Simulacro 88, y los 114 restantes (lib, config, estilos compartidos) se prorratean 55/45.
+
+**La fórmula:** `commits × 120k + churn × 300`. Cada commit es una ronda con el agente, y lo que más pesa en una ronda no es el código que sale sino el contexto que entra una y otra vez.
+
+**La calibración no es inventada.** El README de `transformer-architecture` publica el consumo **medido** de la sesión original en Codex: 83,7 M de tokens para ~91.000 líneas, de los cuales **80,9 M son input cacheado** y solo 397 k son salida. Eso es ~920 tokens por línea de churn, y confirma la forma del gasto: el 97% es contexto re-enviado, no generación. La fórmula de arriba queda en el mismo orden de magnitud.
+
+**Sanity check contra lo que Axel recuerda:** dice que Copiloto + Simulacro fue lo más caro (≈49 M juntos, 308 commits en 6 semanas) y que el Dashboard lo hizo mucho más rápido (17 M, 67 commits). Los números dan lo mismo que su memoria.
+
 ## 📚 De dónde salen las descripciones
 
 Las de los cuatro productos del Universo Loro están escritas leyendo el código, no la landing:
@@ -214,6 +234,6 @@ Las de los cuatro productos del Universo Loro están escritas leyendo el código
 
 `axellaban/universo-loro` es la página índice que los agrupa. Copiloto y Simulacro son **dos productos distintos** del mismo repo, no dos nombres de lo mismo.
 
-⚠️ **`transformer-architecture` es un fork.** El README del repo apunta a "la demo original" en `transformer-architecture.petergostev.chatgpt.site` y dice "Construido con GPT-6-Astra en Codex". Lo de Axel encima es una capa de cambios (narración en reproducción libre, página de diagnóstico). Está listado en el lab igual, pero conviene decidir si se aclara de dónde viene: en una página que arranca con "mi sueño era ser científico loco", presentar un fork sin marcarlo se lee como propio.
+⚠️ **`transformer-architecture` es un fork**, y la ficha ahora lo dice con el campo `nota`. El commit `8fad2fb` importa 91.046 líneas del proyecto original de Peter Gostev; lo de Axel son 7 commits del 13 de septiembre (~1.000 líneas): traducción al español, la narración y una página de diagnóstico.
 
 **"Astra 6" es un modelo, no un proyecto.** El nombre real del proyecto es "Arquitectura Transformer"; GPT-6-Astra es con lo que se construyó — por eso aparece en `modelos` y no en `titulo`.
