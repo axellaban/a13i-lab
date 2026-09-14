@@ -189,16 +189,29 @@
   .card:hover .more .pl{ background:rgba(212,97,42,.22); }
 
   /* ── DETALLE: panel sobre toda la grilla ─────────────────────── */
+  .backdrop{
+    position:fixed; inset:0; z-index:150;
+    background:rgba(31,20,16,.34); backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px);
+    opacity:0; visibility:hidden; pointer-events:none;
+    transition:opacity .26s ease, visibility 0s linear .26s;
+  }
+  .backdrop.is-on{ opacity:1; visibility:visible; pointer-events:auto; transition-delay:0s; }
+
   .overlay{
-    position:absolute; inset:0; z-index:5;
+    position:fixed; z-index:200;
+    top:50%; left:50%;
+    width:min(1080px, 92vw); height:min(660px, 82vh);
     display:grid; grid-template-columns:36% 1fr;
     background:var(--card); border:1px solid rgba(212,97,42,.35); border-radius:1.15em;
-    box-shadow:0 18px 50px rgba(31,20,16,.16); overflow:hidden;
+    box-shadow:0 24px 70px rgba(31,20,16,.24); overflow:hidden;
     font-size:calc(1em * var(--so, 1));
-    opacity:0; transform:scale(.985); pointer-events:none; visibility:hidden;
+    opacity:0; transform:translate(-50%,-50%) scale(.98); pointer-events:none; visibility:hidden;
     transition:opacity .26s ease, transform .26s cubic-bezier(.22,1,.36,1), visibility 0s linear .26s;
   }
-  .overlay.is-on{ opacity:1; transform:none; pointer-events:auto; visibility:visible; transition-delay:0s; }
+  .overlay.is-on{
+    opacity:1; transform:translate(-50%,-50%) scale(1);
+    pointer-events:auto; visibility:visible; transition-delay:0s;
+  }
 
   .ov-art{
     position:relative; overflow:hidden;
@@ -264,10 +277,12 @@
     .more{ padding-top:.55em; }
     /* En pantalla chica el detalle ocupa toda la pantalla */
     .overlay{
-      position:fixed; inset:0; z-index:200; border-radius:0; border:0;
+      top:0; left:0; width:100%; height:100%;
+      border-radius:0; border:0;
       grid-template-columns:1fr; grid-template-rows:auto 1fr;
-      transform:translateY(1.5%);
+      transform:translate(0,1.5%) scale(1);
     }
+    .overlay.is-on{ transform:translate(0,0) scale(1); }
     .ov-art{ height:22vh; border-right:0; border-bottom:1px solid var(--border); }
     .ov-body{ padding:1.4em 1.3em calc(1.3em + env(safe-area-inset-bottom)); overflow:auto; }
     .overlay h3{ font-size:1.35em; }
@@ -432,32 +447,58 @@ const ART = {
     </g>
   </svg>`,
 
-  /* Copiloto de Entrevistas: la pregunta y el puntaje que devuelve */
+  /* Copiloto: lo que escucha entra como onda y sale como respuesta */
   copiloto: `<svg viewBox="0 0 200 125" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
     <style>
       .wv rect{ animation:wv 1.5s ease-in-out infinite; transform-box:fill-box; transform-origin:center; }
       .wv rect:nth-of-type(2){ animation-delay:.15s; } .wv rect:nth-of-type(3){ animation-delay:.3s; }
       .wv rect:nth-of-type(4){ animation-delay:.45s; } .wv rect:nth-of-type(5){ animation-delay:.6s; }
-      @keyframes wv{ 0%,100%{ transform:scaleY(.45); } 50%{ transform:scaleY(1); } }
+      @keyframes wv{ 0%,100%{ transform:scaleY(.4); } 50%{ transform:scaleY(1); } }
       @media(prefers-reduced-motion:reduce){ .wv rect{ animation:none; } }
     </style>
     <rect width="200" height="125" fill="#FFFDF8"/>
-    <path d="M22 26 h88 a10 10 0 0 1 10 10 v34 a10 10 0 0 1 -10 10 h-62 l-16 14 v-14 h-10 a10 10 0 0 1 -10 -10 v-34 a10 10 0 0 1 10 -10 z"
+    <path d="M16 24 h64 a9 9 0 0 1 9 9 v30 a9 9 0 0 1 -9 9 h-46 l-13 11 v-11 h-5 a9 9 0 0 1 -9 -9 v-30 a9 9 0 0 1 9 -9 z"
           fill="#FFFFFF" stroke="#E2CDB4" stroke-width="1.5"/>
-    <g class="wv" fill="#D4612A">
-      <rect x="40" y="40" width="5" height="26" rx="2.5"/>
-      <rect x="53" y="40" width="5" height="26" rx="2.5"/>
-      <rect x="66" y="40" width="5" height="26" rx="2.5"/>
-      <rect x="79" y="40" width="5" height="26" rx="2.5"/>
-      <rect x="92" y="40" width="5" height="26" rx="2.5"/>
+    <g class="wv" fill="#1A1410" opacity=".75">
+      <rect x="28" y="36" width="5" height="24" rx="2.5"/>
+      <rect x="40" y="36" width="5" height="24" rx="2.5"/>
+      <rect x="52" y="36" width="5" height="24" rx="2.5"/>
+      <rect x="64" y="36" width="5" height="24" rx="2.5"/>
+      <rect x="76" y="36" width="5" height="24" rx="2.5"/>
     </g>
-    <circle cx="156" cy="56" r="27" fill="none" stroke="#EAD9C8" stroke-width="7"/>
-    <circle cx="156" cy="56" r="27" fill="none" stroke="#1E8E5A" stroke-width="7" stroke-linecap="round"
-            stroke-dasharray="132 170" transform="rotate(-90 156 56)"/>
-    <path d="M147 57 l6 7 l13 -15" fill="none" stroke="#1E8E5A" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-    <g fill="#EAD9C8">
-      <rect x="128" y="96" width="56" height="5" rx="2.5"/>
-      <rect x="140" y="107" width="32" height="5" rx="2.5"/>
+    <path d="M94 62 h18" stroke="#D4612A" stroke-width="2" stroke-linecap="round" stroke-dasharray="4 4"/>
+    <path d="M110 57 l7 5 l-7 5 z" fill="#D4612A"/>
+    <rect x="124" y="28" width="62" height="70" rx="10" fill="#FFFFFF" stroke="#D4612A" stroke-width="1.5"/>
+    <g>
+      <circle cx="136" cy="45" r="3" fill="#D4612A"/><rect x="144" y="43" width="34" height="4" rx="2" fill="#EAD9C8"/>
+      <circle cx="136" cy="63" r="3" fill="#D4612A"/><rect x="144" y="61" width="28" height="4" rx="2" fill="#EAD9C8"/>
+      <circle cx="136" cy="81" r="3" fill="#D4612A"/><rect x="144" y="79" width="32" height="4" rx="2" fill="#EAD9C8"/>
+    </g>
+  </svg>`,
+
+  /* Simulacro: el informe que sale al terminar */
+  simulacro: `<svg viewBox="0 0 200 125" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+    <style>
+      .ring{ animation:ring 3.2s ease-in-out infinite; }
+      @keyframes ring{ 0%,100%{ opacity:1; } 50%{ opacity:.72; } }
+      @media(prefers-reduced-motion:reduce){ .ring{ animation:none; } }
+    </style>
+    <rect width="200" height="125" fill="#FFFDF8"/>
+    <circle cx="60" cy="62" r="33" fill="none" stroke="#EAD9C8" stroke-width="9"/>
+    <circle class="ring" cx="60" cy="62" r="33" fill="none" stroke="#1E8E5A" stroke-width="9" stroke-linecap="round"
+            stroke-dasharray="166 208" transform="rotate(-90 60 62)"/>
+    <path d="M49 63 l8 8 l16 -19" fill="none" stroke="#1E8E5A" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    <g>
+      <rect x="112" y="30" width="72" height="6" rx="3" fill="#EAD9C8"/>
+      <rect x="112" y="30" width="58" height="6" rx="3" fill="#D4612A"/>
+      <rect x="112" y="46" width="72" height="6" rx="3" fill="#EAD9C8"/>
+      <rect x="112" y="46" width="44" height="6" rx="3" fill="#D4612A"/>
+      <rect x="112" y="62" width="72" height="6" rx="3" fill="#EAD9C8"/>
+      <rect x="112" y="62" width="63" height="6" rx="3" fill="#D4612A"/>
+      <rect x="112" y="78" width="72" height="6" rx="3" fill="#EAD9C8"/>
+      <rect x="112" y="78" width="36" height="6" rx="3" fill="#D4612A"/>
+      <rect x="112" y="94" width="72" height="6" rx="3" fill="#EAD9C8"/>
+      <rect x="112" y="94" width="52" height="6" rx="3" fill="#D4612A"/>
     </g>
   </svg>`,
 
@@ -488,30 +529,32 @@ const ART = {
     </g>
   </svg>`,
 
-  /* Loro Fitness: el HUD del juego */
+  /* Loro Run: el cuerpo leido por la camara, corriendo por el carril */
   fitness: `<svg viewBox="0 0 200 125" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
     <style>
-      .jump{ animation:jump 1.4s cubic-bezier(.3,0,.5,1) infinite; }
-      @keyframes jump{ 0%,100%{ transform:translateY(0); } 45%{ transform:translateY(-20px); } }
-      @media(prefers-reduced-motion:reduce){ .jump{ animation:none; } }
+      .flap{ transform-origin:100px 52px; animation:flap 1.6s ease-in-out infinite; }
+      @keyframes flap{ 0%,100%{ transform:rotate(-5deg); } 50%{ transform:rotate(5deg); } }
+      @media(prefers-reduced-motion:reduce){ .flap{ animation:none; } }
     </style>
     <rect width="200" height="125" fill="#FFFDF8"/>
-    <g fill="#E15E3F">
-      <path d="M28 26 a5 5 0 0 1 9 0 a5 5 0 0 1 9 0 q0 8 -9 14 q-9 -6 -9 -14 z"/>
-      <path d="M52 26 a5 5 0 0 1 9 0 a5 5 0 0 1 9 0 q0 8 -9 14 q-9 -6 -9 -14 z"/>
-      <path d="M76 26 a5 5 0 0 1 9 0 a5 5 0 0 1 9 0 q0 8 -9 14 q-9 -6 -9 -14 z" opacity=".25"/>
+    <g stroke="#EAD9C8" stroke-width="1.5">
+      <line x1="16" y1="122" x2="84" y2="40"/><line x1="184" y1="122" x2="116" y2="40"/>
+      <line x1="72" y1="56" x2="128" y2="56"/><line x1="60" y1="76" x2="140" y2="76"/>
+      <line x1="44" y1="100" x2="156" y2="100"/>
     </g>
-    <rect x="124" y="26" width="52" height="10" rx="5" fill="#EAD9C8"/>
-    <rect x="124" y="26" width="36" height="10" rx="5" fill="#1E8E5A"/>
-    <line x1="24" y1="102" x2="176" y2="102" stroke="#E2CDB4" stroke-width="3" stroke-linecap="round"/>
-    <g class="jump">
-      <rect x="54" y="78" width="22" height="22" rx="6" fill="#D4612A"/>
-      <circle cx="69" cy="86" r="2.6" fill="#FFFDF8"/>
+    <g class="flap">
+      <path d="M96 52 C 78 42, 58 44, 48 54 C 62 58, 80 60, 96 58 z" fill="#D4612A" opacity=".85"/>
+      <path d="M104 52 C 122 42, 142 44, 152 54 C 138 58, 120 60, 104 58 z" fill="#D4612A" opacity=".85"/>
     </g>
-    <g fill="#EAD9C8">
-      <rect x="106" y="86" width="14" height="16" rx="3"/>
-      <rect x="130" y="72" width="14" height="30" rx="3"/>
-      <rect x="154" y="60" width="14" height="42" rx="3"/>
+    <g stroke="#1A1410" stroke-width="3" stroke-linecap="round" fill="none">
+      <line x1="100" y1="46" x2="100" y2="78"/>
+      <line x1="100" y1="78" x2="88" y2="100"/><line x1="100" y1="78" x2="112" y2="100"/>
+    </g>
+    <circle cx="100" cy="36" r="9" fill="#1A1410"/>
+    <g fill="#D4612A">
+      <circle cx="100" cy="46" r="3.4"/><circle cx="100" cy="78" r="3.4"/>
+      <circle cx="88" cy="100" r="3.4"/><circle cx="112" cy="100" r="3.4"/>
+      <circle cx="48" cy="54" r="3"/><circle cx="152" cy="54" r="3"/>
     </g>
   </svg>`
 };
@@ -532,31 +575,69 @@ const ART = {
    ═══════════════════════════════════════════════════════════════ */
 const PROYECTOS = [
   {
-    titulo: 'Copiloto de Entrevistas con IA',
+    titulo: 'Copiloto de Entrevistas',
     familia: 'Universo Loro',
-    tagline: 'El #1 de América Latina. Simulacro de entrevistas con IA y feedback al instante.',
+    tagline: 'Te sopla la respuesta mientras te están entrevistando, en un segundo y pico.',
     art: 'copiloto',
-    lead: 'El #1 de América Latina.',
+    lead: 'Asistente de respuestas en tiempo real para entrevistas, discovery calls y reuniones: escucha lo que te preguntan y te tira la respuesta en pantalla, anclada a tu perfil.',
     items: [
-      { n: 'Qué hace', d: 'Simulacro de entrevistas con IA y feedback al instante.' }
+      { n: 'Cómo funciona', bullets: [
+        'Transcripción en streaming con Deepgram Nova-2 en español, por WebSocket directo desde el navegador.',
+        'Corta por fin de frase y Gemini escribe la respuesta en bullets, mientras la llamada sigue.',
+        'De que termina la pregunta a que arranca la respuesta: entre 1,2 y 1,5 segundos.'
+      ]},
+      { n: 'Dos modos de escuchar', d: 'El micrófono del celular apoyado al lado de la notebook, o el audio directo de la pestaña de Meet o Zoom. Mobile-first, con wake lock para que no se apague la pantalla.' },
+      { n: 'Las claves no viajan', d: 'La API key de Deepgram nunca llega al navegador: el server emite un token efímero de 60 segundos. La de Gemini vive solo del lado del servidor.' }
     ],
-    link: 'https://universo-loro.vercel.app/'
+    link: 'https://loreado.vercel.app/copiloto'
+  },
+  {
+    titulo: 'Simulacro de Entrevistas',
+    familia: 'Universo Loro',
+    tagline: 'Una entrevista hablada con IA que te repregunta, y un informe crudo al terminar.',
+    art: 'simulacro',
+    lead: 'Entrevista simulada con un entrevistador de IA que te ve, te escucha y te aprieta. Al final te arma el informe.',
+    items: [
+      { n: 'El entrevistador', d: 'Le pasás la empresa, el puesto, tu CV y el tipo de entrevista (técnica, comportamiento, HR o general). Pregunta de a una, y si la respuesta sale vaga no la deja pasar: pide el ejemplo concreto, el número, qué habrías hecho distinto.' },
+      { n: 'El informe', bullets: [
+        'Puntaje de 0 a 100, nivel y veredicto: si en esa entrevista avanzabas de ronda o no.',
+        'Cinco indicadores: claridad, estructura, fit con el puesto, confianza y comunicación.',
+        'Pregunta por pregunta, qué faltó y una respuesta ideal escrita en primera persona con tu perfil real, lista para decir en voz alta.',
+        'Como es hablada, también mide la entrega: muletillas, divagues y respuestas que se cortan.'
+      ]}
+    ],
+    link: 'https://loreado.vercel.app/mock'
   },
   {
     titulo: 'Envía un Lorito',
     familia: 'Universo Loro',
-    tagline: 'Nueva red social, lenta e inútil. Mensajes que tardan.',
+    tagline: 'Nueva red social, lenta e inútil. El mensaje vuela de verdad y tarda lo que tiene que tardar.',
     art: 'lorito',
-    lead: 'Nueva red social, lenta e inútil. Mensajes que tardan.',
-    link: 'https://universo-loro.vercel.app/'
+    lead: 'El ave despega desde tu ubicación real y hasta que no aterriza en el nido de la otra persona, el mensaje no existe del otro lado.',
+    items: [
+      { n: 'Seis aves, un canje', d: 'Cuanto más rápido vuela, menos le entra en la cabeza. El perico hace 90 km/h pero solo 120 caracteres; el guacamayo, 25 km/h y 2000. Elegir el ave es parte del mensaje.' },
+      { n: 'Tarda en serio', d: 'Cruzar la ciudad son entre 5 y 21 minutos. Buenos Aires a Montevideo, entre 2 y 8 horas. A Dublín, entre 5 y 18 días. Esa es la idea.' },
+      { n: 'Y no siempre llega lo que escribiste', bullets: [
+        'La cotorra va repitiendo el mensaje en voz alta todo el viaje y se le mezcla: teléfono descompuesto con alas.',
+        'El perico se enamora a mitad de camino, se queda dando vueltas y llega tarde, con el mensaje retocado por ella, firma incluida.',
+        'La paloma explota en confeti. El cuervo apaga la pantalla y le tira plumas encima.',
+        'El 0,2% de los loros no llega nunca. Es poco. No es cero.'
+      ]}
+    ],
+    link: 'https://enviaunlorito.vercel.app/'
   },
   {
-    titulo: 'Loro Fitness',
+    titulo: 'Loro Run',
     familia: 'Universo Loro',
-    tagline: 'El juego.',
+    tagline: 'Un runner en 3D que se juega con el cuerpo, leído desde la cámara del navegador.',
     art: 'fitness',
-    lead: 'El juego.',
-    link: 'https://universo-loro.vercel.app/'
+    lead: 'Runner en primera persona: la carrera avanza sola y vos seguís al guacamayo por el templo de las alas moviendo el cuerpo.',
+    items: [
+      { n: 'Cuatro gestos', d: 'Izquierda, derecha, agacharse y salto, leídos de la cámara. Modo sin impacto: levantar una rodilla reemplaza el salto.' },
+      { n: 'Se calibra antes de arrancar', d: 'Un asistente chequea que estés entero en el encuadre, la altura, el centro y que estés quieto. Las alas se anclan a tus hombros y van ganando color con cada repetición confirmada.' },
+      { n: 'Todo corre en tu máquina', d: 'MediaPipe Pose Landmarker con 33 puntos, en el navegador con WASM y GPU. El video de la cámara no se graba ni sale para ningún servidor.' }
+    ],
+    link: 'https://juego-fitness.vercel.app/'
   },
   {
     titulo: 'Dashboard eCommerce Day 2026',
@@ -674,11 +755,17 @@ const MEME_SRC = '/assets/dexter-lab.gif';
 const grid = document.getElementById('grid');
 grid.innerHTML = PROYECTOS.map(cardHTML).join('');
 
+const backdrop = document.createElement('div');
+backdrop.className = 'backdrop';
+document.body.appendChild(backdrop);
+
 const overlay = document.createElement('div');
 overlay.className = 'overlay';
 overlay.id = 'ov';
+overlay.setAttribute('role', 'dialog');
+overlay.setAttribute('aria-modal', 'true');
 overlay.setAttribute('aria-hidden', 'true');
-grid.appendChild(overlay);
+document.body.appendChild(overlay);
 
 /* ── Abrir / cerrar el detalle ───────────────────────────────── */
 let abierta = -1;
@@ -705,6 +792,7 @@ function abrir(i){
   if(!p) return;
   overlay.innerHTML = overlayHTML(p, i);
   overlay.classList.add('is-on');
+  backdrop.classList.add('is-on');
   overlay.setAttribute('aria-hidden', 'false');
   grid.querySelectorAll('.face').forEach((f, k) => f.setAttribute('aria-expanded', String(k === i)));
   abierta = i;
@@ -717,6 +805,7 @@ function abrir(i){
 function cerrar(){
   if(abierta < 0) return;
   overlay.classList.remove('is-on');
+  backdrop.classList.remove('is-on');
   overlay.setAttribute('aria-hidden', 'true');
   const face = grid.querySelectorAll('.face')[abierta];
   grid.querySelectorAll('.face').forEach(f => f.setAttribute('aria-expanded', 'false'));
@@ -724,9 +813,11 @@ function cerrar(){
   if(face) face.focus();
 }
 
+overlay.addEventListener('click', (e) => {
+  if(e.target.closest('.close')) cerrar();
+});
+
 grid.addEventListener('click', (e) => {
-  if(e.target.closest('.close')){ cerrar(); return; }
-  if(e.target.closest('.visit')) return;
   const face = e.target.closest('.face');
   if(!face) return;
   const i = Number(face.dataset.i);

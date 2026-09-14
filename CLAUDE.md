@@ -32,7 +32,7 @@ título + bajada   |   meme        ← dos columnas en desktop, apiladas en mobi
 
 La grilla es `repeat(auto-fit, minmax(12em, 1fr))`: reparte sola las fichas que haya, sin dejar huecos en la última fila. Con hasta 5 entran todas en una fila; a partir de ahí arma dos.
 
-Al tocar una ficha se abre un panel que cubre **toda la grilla** (arte a la izquierda, detalle a la derecha). En mobile ese panel pasa a pantalla completa. Se cierra con la ✕, con Escape o tocando afuera.
+Al tocar una ficha se abre un modal centrado (`.overlay`, colgado del `<body>`) con el arte a la izquierda y el detalle a la derecha, sobre un fondo oscurecido (`.backdrop`). Mide `min(1080px, 92vw) × min(660px, 82vh)`; en mobile pasa a pantalla completa. Se cierra con la ✕, con Escape o tocando afuera.
 
 No hay header fijo, nav, filtros ni footer. Agregar cualquiera de esas cosas rompe la premisa de la pantalla única.
 
@@ -41,7 +41,7 @@ No hay header fijo, nav, filtros ni footer. Agregar cualquiera de esas cosas rom
 Dos escalas, las dos manejadas por JS, las dos con búsqueda binaria:
 
 - **`--s`** (en `:root`) escala la página entera. Todo el layout está en `em` sobre el `font-size` de `.screen`, así que bajar `--s` achica todo proporcionalmente. `fit()` lo baja hasta que `.inner` entra en el alto del viewport (piso 0.45).
-- **`--so`** (en `.overlay`) hace lo mismo con el detalle abierto: `fitOverlay()` lo baja hasta que el contenido entra en el panel (piso 0.5), así nunca aparece scroll interno.
+- **`--so`** (en `.overlay`) hace lo mismo con el detalle abierto: `fitOverlay()` lo baja hasta que el contenido entra en el modal (piso 0.5), así nunca aparece scroll interno. Con el modal a 660px de alto hoy no necesita bajar de 1 en ningún viewport probado; si un proyecto trae mucho más texto, escala en vez de recortar.
 
 Las dos se recalculan en `resize`. El `font-size` base ya es responsive por su cuenta (`clamp(10.5px, min(3.1vw, 1.78vh), 17px)`); `--s` es el ajuste fino encima de eso.
 
@@ -75,11 +75,14 @@ Reglas:
 
 ## 🖼️ El arte de las fichas
 
-El objeto `ART` tiene un SVG por proyecto, dibujado a mano en la paleta del sitio, que ilustra lo que hay adentro: `copiloto` (burbuja con waveform + anillo de puntaje), `lorito` (avión de papel con estela y reloj), `fitness` (HUD de juego), `eday` (radar chart + heatmap del fact checking), `astra` (bloques de transformers con líneas de atención) y `loro` (órbitas, quedó sin usar al separar los productos, sirve si vuelve una ficha paraguas). Todos usan `viewBox="0 0 200 125"` (16:10, igual que `.art`) y `preserveAspectRatio="xMidYMid meet"`: así llenan exacto la ficha en desktop y se ven enteros, sin recorte, en el thumbnail cuadrado de mobile. El fondo de `.art` y `.ov-art` es plano `#FFFDF8` para que el encuadre nunca se note.
+El objeto `ART` tiene un SVG por proyecto, dibujado a mano en la paleta del sitio, que ilustra lo que hay adentro: `copiloto` (la onda de voz que entra y la respuesta que sale), `simulacro` (anillo de puntaje + los cinco indicadores del informe), `lorito` (avión de papel con estela y reloj), `fitness` (figura con landmarks de pose y alas, sobre los carriles), `eday` (radar chart + heatmap del fact checking), `astra` (bloques de transformers con líneas de atención) y `loro` (órbitas, quedó sin usar al separar los productos, sirve si vuelve una ficha paraguas). Todos usan `viewBox="0 0 200 125"` (16:10, igual que `.art`) y `preserveAspectRatio="xMidYMid meet"`: así llenan exacto la ficha en desktop y se ven enteros, sin recorte, en el thumbnail cuadrado de mobile. El fondo de `.art` y `.ov-art` es plano `#FFFDF8` para que el encuadre nunca se note.
 
 **Para poner una captura real** en lugar del SVG: dejar el archivo en `assets/` y agregarle `imagen: '/assets/loquesea.webp'` al proyecto. El SVG queda como fallback si algún día se saca la imagen.
 
-⚠️ Los `<style>` dentro de un SVG aplican a **todo el documento**, no solo a ese SVG. Por eso las clases del arte van con prefijo (`art-spin`, `art-pulse`). No usar nombres genéricos ahí adentro.
+⚠️ Dos trampas al dibujar el arte:
+
+- Los `<style>` dentro de un SVG aplican a **todo el documento**, no solo a ese SVG. Por eso las clases del arte van con prefijo (`art-spin`, `art-pulse`). No usar nombres genéricos ahí adentro.
+- No poner `transform-box` / `transform-origin` en un elemento que ya trae un `transform="rotate(a cx cy)"` como atributo: el origen se aplica encima del que declara el rotate y el elemento se dibuja corrido. Solo hacen falta cuando la animación misma escala o rota, y el elemento no tiene transform propio.
 
 ## 🎨 Sistema de diseño
 
@@ -138,5 +141,17 @@ Push a `main` → auto-deploy en Vercel.
 1. Capturas reales de los tres proyectos, para reemplazar el arte generado (campo `imagen`).
 2. `og:image` propio del lab (hoy reusa el genérico de accelerator).
 3. El GIF: dejar `assets/dexter-lab.gif` en el repo o apuntar `MEME_SRC` a una URL externa (hoy cae en el dibujo de fallback).
-4. Universo Loro: Axel mencionó cuatro productos y hay ficha para tres (Copiloto de Entrevistas, Envía un Lorito, Loro Fitness). Falta el cuarto.
-5. Confirmar el dominio final.
+4. Confirmar el dominio final.
+
+## 📚 De dónde salen las descripciones
+
+Las de los cuatro productos del Universo Loro están escritas leyendo el código, no la landing:
+
+| Ficha | Repo | Deploy |
+|---|---|---|
+| Copiloto de Entrevistas | `axellaban/loro` (ruta `/copiloto` → `/app`) | loreado.vercel.app/copiloto |
+| Simulacro de Entrevistas | `axellaban/loro` (ruta `/mock` → `/simulador`) | loreado.vercel.app/mock |
+| Envía un Lorito | `axellaban/Enviaunloro` | enviaunlorito.vercel.app |
+| Loro Run | `axellaban/juego-fitness` | juego-fitness.vercel.app |
+
+`axellaban/universo-loro` es la página índice que los agrupa. Copiloto y Simulacro son **dos productos distintos** del mismo repo, no dos nombres de lo mismo.
