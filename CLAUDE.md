@@ -150,7 +150,7 @@ La nota del Mom Test usa `assets/mom.png`. El original que subió Axel (`mom.jpg
 
 Los dos están **portados del hero de `a13i-accelerator`**, que no usa rough-notation sino **roughjs directo** (`https://unpkg.com/roughjs@4.6.6/bundled/rough.js`, pinneada). Eso es lo que da el trazo dibujado a mano; rough-notation con parámetros parecidos queda bastante peor.
 
-Se marcan en el HTML con `data-hl="underline"` o `data-hl="highlight"` más `data-hl-color`. Hoy: subrayado en "científico loco" (`#D4612A`) y resaltado en "el de Dexter" (`rgba(225,94,63,0.22)`). Para mover el efecto, se cambia de span — el JS toma todos los `[data-hl]` que encuentre.
+Se marcan en el HTML con `data-hl="underline"` o `data-hl="highlight"` más `data-hl-color`. Hoy: subrayado en "científico loco" (`#D4612A`) y resaltado en "laboratorio como el de Dexter" (`rgba(225,94,63,0.22)`). Para mover el efecto, se cambia de span — el JS toma todos los `[data-hl]` que encuentre.
 
 - **Subrayado:** dos pasadas de línea, ida y vuelta.
 - **Resaltado:** una sola línea del grosor del renglón (`r.height * 0.88`), `roughness 2.4`, dibujada en un SVG insertado **antes** del span para que quede detrás del texto.
