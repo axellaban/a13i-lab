@@ -99,7 +99,9 @@ Reglas:
 - `items` admite `n`, `d` y `bullets`. Se pueden combinar o usar sueltos.
 - `familia` agrupa productos que son parte de algo más grande sin necesidad de una ficha paraguas: los cuatro productos del Universo Loro tienen ficha propia y comparten esa etiqueta, que se ve en el detalle.
 - El label del link se deriva de la URL (se le saca el protocolo y la barra final).
-- `modelos` / `tokens` / `prompts` arman la ficha técnica al pie del detalle. **`tokens` es una estimación y la página lo dice** (la etiqueta es "Tokens estimados"): sale del tamaño del código del repo por un multiplicador según cómo se construyó — iterando con un agente se re-lee el proyecto muchas veces, un solo prompt no. No hay medición real de consumo en ningún lado, así que no presentarlo como dato duro.
+- `modelos` / `tech` / `tokens` / `prompts` arman la ficha técnica al pie del detalle: una barra con el reparto de modelos, y debajo la tecnología clave, los tokens y, si fue de uno o dos prompts, cuántos.
+- **`modelos` es de memoria de Axel, y la página lo marca "aprox."** El patrón que él describe: casi siempre Opus 5, con Sonnet 5 alrededor del 40%, y Sonnet nunca falta cuando hay algún modelo de Claude. Simulacro y el Dashboard son solo Opus + Sonnet (sin Fable). Loro Run y Arquitectura Transformer son 100% GPT-6-Astra. El reparto exacto donde entra Fable (15%) es una suposición, no un dato que él haya dado.
+- **`tokens` es una estimación y la página lo dice** (la etiqueta es "Tokens estimados"): sale del tamaño del código del repo por un multiplicador según cómo se construyó — iterando con un agente se re-lee el proyecto muchas veces, un solo prompt no. No hay medición real de consumo en ningún lado, así que no presentarlo como dato duro.
 - Todo el contenido pasa por `esc()` antes de entrar al DOM. No romper eso al agregar campos.
 
 ## 🖼️ El arte de las fichas

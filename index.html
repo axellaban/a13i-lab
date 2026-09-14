@@ -38,6 +38,7 @@
     /* Paleta: idéntica a a13i-accelerator / a13i-partner */
     --bg:          #FEFBF2;
     --card:        #FFFFFF;
+    --ui:          #F7F0E4;
     --card-2:      #FDFAF3;
     --border:      #E8E3DE;
     --border-2:    #EAD9C8;
@@ -270,9 +271,20 @@
   }
   .ov-foot{ margin-top:auto; padding-top:1.2em; }
   .tech{
-    display:flex; flex-wrap:wrap; gap:.5em 2.2em;
+    display:flex; flex-direction:column; gap:.85em;
     padding:.85em 0 .9em; border-top:1px solid var(--border);
   }
+  .tech-modelos{ display:flex; flex-direction:column; gap:.4em; max-width:34em; }
+  .mbar{
+    display:flex; height:.45em; border-radius:.25em; overflow:hidden;
+    background:var(--ui);
+  }
+  .mbar i{ display:block; height:100%; }
+  .mleg{ display:flex; flex-wrap:wrap; gap:.25em 1.1em; font-size:.78em; color:var(--muted); }
+  .mleg span{ display:inline-flex; align-items:center; gap:.4em; }
+  .mleg em{ width:.5em; height:.5em; border-radius:50%; font-style:normal; flex-shrink:0; }
+  .mleg b{ color:var(--text); font-weight:600; }
+  .tech-row{ display:flex; flex-wrap:wrap; gap:.5em 2.2em; }
   .tech-cel{ display:flex; flex-direction:column; gap:.2em; min-width:0; }
   .tech-l{
     font-family:var(--mono); font-size:.62em; font-weight:700;
@@ -363,7 +375,8 @@
       box-shadow:0 2px 10px rgba(31,20,16,.14);
     }
     .visit{ font-size:.82em; padding-top:.2em; }
-    .tech{ gap:.5em 1.4em; padding:.7em 0 .8em; }
+    .tech{ gap:.7em; padding:.7em 0 .8em; }
+    .tech-row{ gap:.5em 1.4em; }
   }
 
   /* Telefono: dos columnas. Tres ya no entran sin que el arte se achique. */
@@ -737,7 +750,8 @@ const ART = {
                         que expliquen solas de que se trata, sin jerga
      lead:    string    opcional — primera linea del detalle
      items:   [{ n, d, bullets[] }]   opcional — sub-productos o versiones
-     modelos: string[]  opcional — con que se construyo
+     modelos: [{n,p}]   opcional — reparto de modelos, p en porcentaje
+     tech:    string[]  opcional — la tecnologia clave, 2 o 3 palabras
      tokens:  string    opcional — estimacion, la pagina la marca como tal
      prompts: string    opcional — solo si se hizo en uno o dos prompts
      link:    string    opcional
@@ -748,7 +762,8 @@ const ART = {
 const PROYECTOS = [
   {
     titulo: 'Copiloto de Entrevistas',
-    modelos: ['Fable 5.1', 'Opus 5'],
+    modelos: [{ n:'Opus 5', p:50 }, { n:'Sonnet 5', p:35 }, { n:'Fable 5.1', p:15 }],
+    tech: ['Transcripción en vivo', 'Streaming LLM'],
     tokens: '~3 M',
     familia: 'Universo Loro',
     pitch: 'Te sopla qué responder mientras te hacen una entrevista.',
@@ -767,7 +782,8 @@ const PROYECTOS = [
   },
   {
     titulo: 'Simulacro de Entrevistas',
-    modelos: ['Fable 5.1', 'Opus 5'],
+    modelos: [{ n:'Opus 5', p:60 }, { n:'Sonnet 5', p:40 }],
+    tech: ['Transcripción en vivo', 'Voz sintética', 'Visión'],
     tokens: '~2,5 M',
     familia: 'Universo Loro',
     pitch: 'Practicás una entrevista con una IA y te corrige después.',
@@ -786,7 +802,8 @@ const PROYECTOS = [
   },
   {
     titulo: 'Envía un Lorito',
-    modelos: ['Fable 5.1', 'Opus 5'],
+    modelos: [{ n:'Opus 5', p:50 }, { n:'Sonnet 5', p:35 }, { n:'Fable 5.1', p:15 }],
+    tech: ['Geolocalización', 'Mapas', 'Notificaciones push'],
     tokens: '~6 M',
     familia: 'Universo Loro',
     pitch: 'Mandás un mensaje y un pájaro lo lleva volando, lento.',
@@ -806,7 +823,8 @@ const PROYECTOS = [
   },
   {
     titulo: 'Loro Run',
-    modelos: ['GPT-6-Astra'],
+    modelos: [{ n:'GPT-6-Astra', p:100 }],
+    tech: ['Computer Vision', 'Pose estimation', '3D en el navegador'],
     tokens: '~120 k',
     prompts: '1',
     familia: 'Universo Loro',
@@ -822,7 +840,8 @@ const PROYECTOS = [
   },
   {
     titulo: 'Dashboard eCommerce Day 2026',
-    modelos: ['Fable 5.1', 'Opus 5'],
+    modelos: [{ n:'Opus 5', p:60 }, { n:'Sonnet 5', p:40 }],
+    tech: ['Transcripción en vivo', 'Tiempo real', 'Fact checking'],
     tokens: '~3,5 M',
     pitch: 'Una IA escucha a quien presenta y lo puntúa.',
     art: 'eday',
@@ -840,7 +859,8 @@ const PROYECTOS = [
   },
   {
     titulo: 'Arquitectura Transformer',
-    modelos: ['GPT-6-Astra'],
+    modelos: [{ n:'GPT-6-Astra', p:100 }],
+    tech: ['3D / WebGL', 'Blender'],
     tokens: '~200 k',
     prompts: '1',
     pitch: 'En 3D: cómo cambió la IA por dentro desde 2018.',
@@ -882,26 +902,41 @@ function cardHTML(p, i){
   '</article>';
 }
 
-/* Modelos usados y estimacion de tokens. La estimacion sale del tamano
-   del codigo en el repo por un multiplicador segun como se construyo:
-   iterando con un agente se re-lee el proyecto muchas veces, un solo
-   prompt no. Es a ojo y la pagina lo dice. */
+/* Ficha tecnica del detalle: con que se construyo, con que esta hecho y
+   cuanto costo. Los tres son aproximados y la pagina lo dice: el reparto
+   de modelos es de memoria de Axel y los tokens salen del tamano del
+   repo por un multiplicador segun como se construyo. */
+const MODELO_COLORES = ['#D4612A', '#E9A57A', '#F0CDB0'];
+
+function barraModelos(modelos){
+  const barra = modelos.map((m, k) =>
+    '<i style="width:' + m.p + '%;background:' + MODELO_COLORES[k % 3] + '"></i>'
+  ).join('');
+  const leyenda = modelos.map((m, k) =>
+    '<span><em style="background:' + MODELO_COLORES[k % 3] + '"></em>' +
+    '<b>' + esc(m.n) + '</b> ' + m.p + '%</span>'
+  ).join('');
+  return '<div class="tech-modelos">' +
+    '<span class="tech-l">Modelos <span class="mt-aprox">aprox.</span></span>' +
+    '<span class="mbar">' + barra + '</span>' +
+    '<span class="mleg">' + leyenda + '</span>' +
+  '</div>';
+}
+
 function fichaTecnica(p){
   const celdas = [];
-  if(p.modelos && p.modelos.length){
-    celdas.push({ l:'Modelos', v:p.modelos.join(' · ') });
-  }
-  if(p.tokens){
-    celdas.push({ l:'Tokens <span class="mt-aprox">estimados</span>', v:p.tokens });
-  }
-  if(p.prompts){
-    celdas.push({ l:'Prompts', v:p.prompts });
-  }
-  if(!celdas.length) return '';
-  return '<div class="tech">' + celdas.map(c =>
-    '<span class="tech-cel"><span class="tech-l">' + c.l + '</span>' +
-    '<span class="tech-v">' + esc(c.v) + '</span></span>'
-  ).join('') + '</div>';
+  if(p.tech && p.tech.length) celdas.push({ l:'Tecnología', v:p.tech.join(' · ') });
+  if(p.tokens) celdas.push({ l:'Tokens <span class="mt-aprox">estimados</span>', v:p.tokens });
+  if(p.prompts) celdas.push({ l:'Prompts', v:p.prompts });
+
+  const modelos = (p.modelos && p.modelos.length) ? barraModelos(p.modelos) : '';
+  const fila = celdas.length
+    ? '<div class="tech-row">' + celdas.map(c =>
+        '<span class="tech-cel"><span class="tech-l">' + c.l + '</span>' +
+        '<span class="tech-v">' + esc(c.v) + '</span></span>').join('') + '</div>'
+    : '';
+
+  return (modelos || fila) ? '<div class="tech">' + modelos + fila + '</div>' : '';
 }
 
 function overlayHTML(p, i){
