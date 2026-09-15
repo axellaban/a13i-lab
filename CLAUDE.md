@@ -322,7 +322,7 @@ Las de los cuatro productos del Universo Loro están escritas leyendo el código
 | Copiloto de Entrevistas | `axellaban/loro` (ruta `/copiloto` → `/app`) | loreado.vercel.app/copiloto |
 | Simulacro de Entrevistas | `axellaban/loro` (ruta `/mock` → `/simulador`) | loreado.vercel.app/mock |
 | Envía un Lorito | `axellaban/Enviaunloro` | enviaunlorito.vercel.app |
-| Loro Run | `axellaban/juego-fitness` | juego-fitness.vercel.app |
+| Loro Run | `axellaban/juego-fitness` | el-loro-corre.vercel.app |
 | Arquitectura Transformer | `axellaban/transformer-architecture` (fork) | transformer-architecture.vercel.app |
 | Dashboard eCommerce Day 2026 | `axellaban/eday-argentina-2026-eCommerce-StartUp-Competition` | eday-2026-argentina-demo-day.vercel.app |
 
