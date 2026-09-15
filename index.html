@@ -7,18 +7,25 @@
 <link rel="icon" href="/favicon/favicon-192.png" type="image/png" sizes="192x192">
 <link rel="icon" href="/favicon/favicon-512.png" type="image/png" sizes="512x512">
 <link rel="apple-touch-icon" href="/favicon/apple-touch-icon.png">
+<link rel="canonical" href="https://a13i-lab.vercel.app/">
 
 <title>A13I Lab — Laboratorio impulsado por la curiosidad</title>
 <meta name="description" content="Experimentos, MVP funcionales y productos digitales. Todo vibecoding con cabeza, para aprender y divertirse.">
 <meta property="og:title" content="A13I Lab — Laboratorio impulsado por la curiosidad">
 <meta property="og:description" content="Experimentos, MVP funcionales y productos digitales. Todo vibecoding con cabeza, para aprender y divertirse.">
-<meta property="og:image" content="/assets/og-lab.jpg">
+<meta property="og:url" content="https://a13i-lab.vercel.app/">
+<meta property="og:site_name" content="A13I Lab">
+<meta property="og:locale" content="es_AR">
+<!-- og:image tiene que ser ABSOLUTA: los scrapers de WhatsApp y Facebook no
+     resuelven rutas relativas y la preview sale sin imagen. Si cambia el
+     dominio, hay que tocar esta URL, la de twitter:image, og:url y el canonical. -->
+<meta property="og:image" content="https://a13i-lab.vercel.app/assets/og-lab.jpg">
 <meta property="og:image:width" content="2400">
 <meta property="og:image:height" content="1260">
 <meta property="og:image:alt" content="A13I Lab — un matraz explotando entre tubos de ensayo, sobre fondo crema">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="/assets/og-lab.jpg">
+<meta name="twitter:image" content="https://a13i-lab.vercel.app/assets/og-lab.jpg">
 <meta name="twitter:title" content="A13I Lab — Laboratorio impulsado por la curiosidad">
 <meta name="twitter:description" content="Experimentos, MVP funcionales y productos digitales. Todo vibecoding con cabeza, para aprender y divertirse.">
 
@@ -26,7 +33,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
 <!-- roughjs: mismo motor y misma version que el subrayado del hero de a13i-accelerator -->
-<script src="https://unpkg.com/roughjs@4.6.6/bundled/rough.js"></script>
+<script defer src="https://unpkg.com/roughjs@4.6.6/bundled/rough.js"></script>
 
 <!-- Google tag (gtag.js) — misma propiedad que accelerator/partner -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-FV5WCTFBC3"></script>
@@ -448,8 +455,8 @@
           <p class="sub">Hoy gracias a la IA voy plasmando casi toda mi curiosidad en <span class="nw">experimentos&nbsp;🔬🧫</span></p>
         </div>
 
-        <!-- El GIF va en assets/dexter-lab.gif. Si no esta, cae solo en el
-             dibujo de abajo y la pagina no se ve rota. -->
+        <!-- El gif sale de MEME_SRC, abajo en el script. Si no carga, cae solo
+             en el dibujo de matraces y la pagina no se ve rota. -->
         <figure class="meme" id="meme">
           <img src="/assets/exploding-chemicals-dexter.gif" alt="El laboratorio de Dexter" id="memeImg">
           <svg class="meme-fb" viewBox="0 0 200 150" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
@@ -1078,6 +1085,8 @@ function abrirUI(i){
   overlay.setAttribute('aria-hidden', 'false');
   grid.querySelectorAll('.face').forEach((f, k) => f.setAttribute('aria-expanded', String(k === i)));
   abierta = i;
+  screenEl.setAttribute('inert', '');
+  screenEl.setAttribute('aria-hidden', 'true');
   fitOverlay();
   const c = overlay.querySelector('.close');
   if(c) c.focus();
@@ -1088,6 +1097,8 @@ function cerrarUI(){
   overlay.classList.remove('is-on');
   backdrop.classList.remove('is-on');
   overlay.setAttribute('aria-hidden', 'true');
+  screenEl.removeAttribute('inert');
+  screenEl.removeAttribute('aria-hidden');
   const face = grid.querySelectorAll('.face')[abierta];
   grid.querySelectorAll('.face').forEach(f => f.setAttribute('aria-expanded', 'false'));
   abierta = -1;
@@ -1105,7 +1116,15 @@ function abrir(i){
     else { history.pushState({ lab: i }, '', url); enHistorial = true; }
   }catch(e){ /* file:// y casos raros: sigue andando sin historial */ }
   abrirUI(i);
-  if(window.gtag) gtag('event', 'lab_proyecto_abierto', { proyecto: p.titulo });
+  trackApertura(p, 'ficha');
+}
+
+/* Una sola puerta para el evento, porque hay dos formas de abrir un detalle:
+   clickeando la ficha y entrando por el link directo del proyecto. La segunda
+   no pasaba por aca y no se registraba ninguna — que son justamente las que
+   llegan de compartir el link. `origen` distingue una de otra. */
+function trackApertura(p, origen){
+  if(window.gtag) gtag('event', 'lab_proyecto_abierto', { proyecto: p.titulo, origen: origen });
 }
 
 function cerrar(){
@@ -1141,7 +1160,19 @@ grid.addEventListener('click', (e) => {
   if(i === abierta) cerrar(); else abrir(i);
 });
 
-document.addEventListener('keydown', (e) => { if(e.key === 'Escape') cerrar(); });
+document.addEventListener('keydown', (e) => {
+  if(e.key === 'Escape'){ cerrar(); return; }
+  /* Con el detalle abierto el Tab se escapaba al fondo, que esta tapado:
+     dos tabs y estabas navegando fichas invisibles. Lo devuelve al modal. */
+  if(e.key !== 'Tab' || abierta < 0) return;
+  const f = [...overlay.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')]
+    .filter(el => el.offsetParent !== null || el === document.activeElement);
+  if(!f.length) return;
+  const primero = f[0], ultimo = f[f.length - 1];
+  const a = document.activeElement;
+  if(e.shiftKey && (a === primero || !overlay.contains(a))){ e.preventDefault(); ultimo.focus(); }
+  else if(!e.shiftKey && (a === ultimo || !overlay.contains(a))){ e.preventDefault(); primero.focus(); }
+});
 document.addEventListener('click', (e) => {
   if(abierta >= 0 && !e.target.closest('#ov') && !e.target.closest('.face')) cerrar();
 });
@@ -1277,6 +1308,7 @@ function boot(){
         enHistorial = true;
       }catch(e){ enHistorial = false; }
       abrirUI(i);
+      trackApertura(PROYECTOS[i], 'link');
     }
   }
 }

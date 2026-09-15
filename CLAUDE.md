@@ -30,7 +30,7 @@ a13i-lab/
 ```
 logo A13I_LAB
 título + bajada   |   meme        ← dos columnas en desktop, apiladas en mobile
-[ 01 ] [ 02 ] [ 03 ] [ 04 ] [ 05 ]      ← grilla portfolio
+[ 01 ] [ 02 ] [ 03 ] [ 04 ] [ 05 ] [ 06 ]   ← grilla portfolio (hoy son 6)
 madre de Dexter + nota del Mom Test     ← al pie, explica la regla del pitch
 ```
 
@@ -97,9 +97,15 @@ Todo sale del array `PROYECTOS` en el `<script>` de `index.html`. Es la única f
     { n: 'Otra versión', bullets: ['Detalle uno.', 'Detalle dos.'] }
   ],
   link:    'https://…',                           // opcional
-  modelos: ['Fable 5.1', 'Opus 5'],               // opcional — con qué se construyó
-  tokens:  '~3 M',                                // opcional — estimación
-  prompts: '1',                                   // opcional — solo si fue uno o dos
+  // — ficha técnica, todo opcional —
+  modelos: [{ n:'Opus 5', p:60 }, { n:'Sonnet 5', p:40 }],  // ⚠️ objetos {n,p}, no strings.
+                                                  //    p es el porcentaje y tiene que sumar 100
+  tech:    ['Computer Vision', 'MediaPipe'],      // 2 o 3 palabras clave
+  ritmo:   '67 commits en 13 días',               // de git (ver la salvedad abajo)
+  tokens:  '~3 M',                                // estimación
+  costo:   '~US$ 2',                              // los tokens a precio de lista de la API
+  prompts: '1',                                   // solo si fue uno o dos
+  nota:    'Es un fork de…',                      // aclaración al pie del detalle
   art:    'copiloto',                             // clave de ART (arte generado)
   imagen: '/assets/loro.webp'                     // opcional — si está, reemplaza al arte
 }
@@ -111,7 +117,7 @@ Reglas:
 - `familia` agrupa productos que son parte de algo más grande sin necesidad de una ficha paraguas: los cuatro productos del Universo Loro tienen ficha propia y comparten esa etiqueta, que se ve en el detalle.
 - El label del link se deriva de la URL (se le saca el protocolo y la barra final).
 - `modelos` / `tech` / `ritmo` / `tokens` / `costo` arman la ficha técnica al pie del detalle: una barra con el reparto de modelos y debajo una grilla de celdas. **El orden va de lo medido a lo estimado** — tecnología y ritmo salen de los repos, tokens y equivalente se infieren de eso. La credibilidad se gana en ese orden: primero lo que se puede verificar, y recién ahí la estimación.
-- `ritmo` junta los dos números exactos que da git: commits y días activos. Es el dato más legible de la ficha — cuando Axel describe un proyecto no dice "27 M de tokens", dice "estuve dos semanas".
+- `ritmo` son commits y días activos. Es el dato más legible de la ficha — cuando Axel describe un proyecto no dice "27 M de tokens", dice "estuve dos semanas". **Los días siempre salen de git; los commits también, salvo en Copiloto y Simulacro**, que comparten repo y llevan un prorrateo (está explicado en la sección de tokens). No lo presentes como "exacto de git" sin esa salvedad.
 - **`modelos` es de memoria de Axel, y la página lo marca "aprox."** El patrón que él describe: casi siempre Opus 5, con Sonnet 5 alrededor del 40%, y Sonnet nunca falta cuando hay algún modelo de Claude. Simulacro y el Dashboard son solo Opus + Sonnet (sin Fable). Loro Run y Arquitectura Transformer son 100% GPT-6-Astra. El reparto exacto donde entra Fable (15%) es una suposición, no un dato que él haya dado.
 - **`tokens` es una estimación y la página lo dice** (la etiqueta es "Tokens estimados"). Ver abajo de dónde sale.
 - Todo el contenido pasa por `esc()` antes de entrar al DOM. No romper eso al agregar campos.
@@ -218,8 +224,8 @@ Push a `main` → auto-deploy en Vercel.
 
 ## 📌 Pendientes
 
-1. Capturas reales de los tres proyectos, para reemplazar el arte generado (campo `imagen`).
-2. Confirmar el dominio final.
+1. Capturas reales de los proyectos, para reemplazar el arte generado (campo `imagen`). Hoy las seis fichas usan el SVG.
+2. **Confirmar el dominio final.** Hoy el `<head>` tiene `https://a13i-lab.vercel.app` hardcodeado en cuatro lugares — `og:url`, `og:image`, `twitter:image` y el `<link rel="canonical">` — porque **`og:image` tiene que ser absoluta o la preview no sale** (los scrapers de WhatsApp y Facebook no resuelven rutas relativas). Al confirmar el dominio hay que cambiar esas cuatro.
 
 ## 🔢 De dónde salen los tokens
 
