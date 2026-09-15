@@ -762,7 +762,10 @@ const ART = {
      items:   [{ n, d, bullets[] }]   opcional — sub-productos o versiones
      modelos: [{n,p}]   opcional — reparto de modelos, p en porcentaje
      tech:    string[]  opcional — la tecnologia clave, 2 o 3 palabras
-     ritmo:   string    opcional — commits y dias activos, los dos de git
+     ritmo:   string    opcional — commits y dias activos. Los dias siempre
+                        salen de git; los commits tambien, salvo en Copiloto
+                        y Simulacro, que comparten repo y van prorrateados
+                        (el reparto esta en CLAUDE.md)
      tokens:  string    opcional — estimacion, la pagina la marca como tal
      costo:   string    opcional — los tokens valuados a precio de lista de
                         la API. Se muestra como "Equivalente en API": es una
@@ -779,7 +782,7 @@ const PROYECTOS = [
     titulo: 'Copiloto de Entrevistas',
     modelos: [{ n:'Opus 5', p:50 }, { n:'Sonnet 5', p:35 }, { n:'Fable 5.1', p:15 }],
     tech: ['Transcripción en vivo', 'Streaming LLM'],
-    ritmo: '169 commits en 20 días',
+    ritmo: '171 commits en 20 días',
     tokens: '~27 M',
     costo: '~US$ 16',
     familia: 'Universo Loro',
@@ -801,7 +804,7 @@ const PROYECTOS = [
     titulo: 'Simulacro de Entrevistas',
     modelos: [{ n:'Opus 5', p:60 }, { n:'Sonnet 5', p:40 }],
     tech: ['Transcripción en vivo', 'Voz sintética', 'Visión'],
-    ritmo: '139 commits en 12 días',
+    ritmo: '137 commits en 12 días',
     tokens: '~22 M',
     costo: '~US$ 12',
     familia: 'Universo Loro',

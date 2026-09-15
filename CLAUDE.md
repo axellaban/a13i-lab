@@ -227,17 +227,50 @@ No hay medición real del consumo de Axel en ningún lado, así que se estima de
 
 | Repo | Commits | Días activos | Churn (líneas) | Período |
 |---|---|---|---|---|
-| `loro` (Copiloto + Simulacro) | 308 | 24 | 40.581 | 10 jul → 21 ago |
+| `loro` (Copiloto + Simulacro) | 308 | 24 | 41.399 | 10 jul → 21 ago |
 | `enviaunloro` | 84 | 10 | 25.473 | 26 ago → 9 sep |
 | `eday` | 67 | 13 | 28.847 | 6 jun → 27 ago |
 | `juego-fitness` | 4 | 2 | 1.199 | 13 → 14 sep |
 | `transformer-architecture` | 9 (2 son el fork) | 2 | 1.008 propias | 13 sep |
 
-`loro` se reparte entre sus dos productos por los commits que tocan los archivos de cada uno: Copiloto 106, Simulacro 88, y los 114 restantes (lib, config, estilos compartidos) se prorratean 55/45. Los días activos se cuentan por fechas distintas de esos mismos commits: Copiloto 20 días (10 jul → 11 ago), Simulacro 12 (20 jul → 11 ago).
+`loro` se reparte entre sus dos productos por los commits que tocan los archivos de cada uno. **Ojo con el solapamiento:** 106 commits tocan algo de Copiloto y 88 tocan algo de Simulacro, pero **21 tocan los dos**, así que sumarlos y restarlos del total cuenta esos 21 dos veces. El reparto correcto sale de los exclusivos:
+
+| | Commits | Churn |
+|---|---|---|
+| Solo Copiloto | 85 | 9.187 |
+| Solo Simulacro | 67 | 7.510 |
+| Los dos | 21 | — |
+| Ninguno (lib, config, estilos) | 135 | 24.702 |
+| **Total repo** | **308** | **41.399** |
+
+Cada producto se queda con sus exclusivos, los 21 compartidos se parten al medio y los 135 de infraestructura se prorratean por la razón de exclusivos (85:67 = **55,9/44,1**). Da **Copiloto 171** y **Simulacro 137**, que suman 308.
+
+El error anterior (114 restantes, prorrateo 55/45) se cancelaba solo: daba 169 y 139, que también sumaban 308 y movían los tokens menos de lo que redondea la ficha. Igual conviene tenerlo bien, porque el número que se muestra es el que alguien va a querer reproducir.
+
+⚠️ **Y por eso el `ritmo` de estos dos no es reproducible con un comando.** En el resto de las fichas un repo es un producto y el número sale de `git log`; acá es un prorrateo. El que muestra la página es el de la tabla de arriba. Los días activos sí son exactos, contados por fechas distintas de los commits de cada producto: Copiloto 20 días (10 jul → 11 ago), Simulacro 12 (20 jul → 11 ago).
 
 **La fórmula:** `commits × 120k + churn × 300`. Cada commit es una ronda con el agente, y lo que más pesa en una ronda no es el código que sale sino el contexto que entra una y otra vez.
 
-**La calibración no es inventada.** El README de `transformer-architecture` publica el consumo **medido** de la sesión original en Codex: 83,7 M de tokens para ~91.000 líneas, de los cuales **80,9 M son input cacheado** y solo 397 k son salida. Eso es ~920 tokens por línea de churn, y confirma la forma del gasto: el 97% es contexto re-enviado, no generación. La fórmula de arriba queda en el mismo orden de magnitud.
+**Qué valida la única medición real que hay, y qué no.** El README de `transformer-architecture` publica el consumo **medido** de la sesión original en Codex: 83,7 M de tokens — **80,9 M de lectura de caché**, 2,4 M de input sin cachear y 397 k de salida.
+
+Eso valida dos cosas:
+
+- **La forma del gasto.** 96,7% es contexto re-enviado, no generación. De ahí sale la mezcla con la que se valúa en dólares (ver la sección siguiente).
+- **El orden de magnitud.** Un proyecto así cuesta decenas de millones de tokens. Los ~27 M de Copiloto no son una cifra inflada: son *menos* que ese único proyecto medido.
+
+Y **no valida la constante de la fórmula.** Una versión anterior de este documento decía "~920 tokens por línea", dividiendo 83,7 M por las 91.046 líneas del commit de importación. **Ese número estaba mal.** De esas 91.046 líneas:
+
+| | Líneas |
+|---|---|
+| Three.js vendorizado (`dist/vendor/`) | 85.209 |
+| JSON generado por `scripts/build_spatial_architecture.py` | 4.670 |
+| **Texto efectivamente escrito** | **~5.800** (200 KB) |
+
+La razón real es ~14.400 tokens por línea, **15× la que decía acá**. Dividir por código que nadie escribió y que ningún agente leyó entero no calibra nada.
+
+Tampoco se puede calibrar el `× 120k` por commit contra esa medición, porque el proyecto original entró al repo como **un solo commit squasheado**: no hay commits entre los cuales dividir. El 120k es un supuesto razonado — una ronda de agente con ~100 k de contexto re-enviado — no un dato.
+
+**Consecuencia, y esto es lo que hay que contestar si alguien la discute:** la fórmula da un **orden de magnitud, no una cifra**. La banda honesta es de ±3×. La respuesta correcta es "es una estimación derivada de la historia de git", nunca "está medido". Por eso la etiqueta de la página es *Tokens estimados* y no un número pelado.
 
 **Sanity check contra lo que Axel recuerda:** dice que Copiloto + Simulacro fue lo más caro (≈49 M juntos, 308 commits en 6 semanas) y que el Dashboard lo hizo mucho más rápido (17 M, 67 commits). Los números dan lo mismo que su memoria.
 
@@ -259,9 +292,20 @@ Precios por millón de tokens:
 
 La diferencia es enorme: Copiloto son ~27 M de tokens, que **sin caché** serían US$ 135 en Opus; con la mezcla medida son ~US$ 16.
 
+**La escritura de caché no está en la tabla, y da igual.** Anthropic cobra el *write* a 1,25× el input, y la valuación de arriba trata todo el input sin cachear como input común. Es la aproximación correcta: el write es un cargo de una sola vez sobre el 2,9% del volumen, y aunque *todo* ese 2,9% fuese write, el millón sube de US$ 0,75 a US$ 0,78 en Opus (+4,8%; +9,4% en Fable, que tiene la caché más barata). Está muy por debajo del ±3× de los tokens — no vale la pena modelarlo.
+
 Los dos proyectos de GPT-6-Astra **no llevan costo**: es un modelo de OpenAI y no hay precio que se pueda verificar desde acá. Mejor no poner número que poner uno inventado.
 
-**Dónde está lo flojo de la ficha, por si alguien la discute:** los precios son exactos (publicados) y el ritmo sale de git, así que esos dos no se discuten. Los tokens son inferidos, pero de datos reales. El eslabón más débil es **el reparto de modelos**: sale de la memoria de Axel, y el 15% de Fable en Copiloto y Envía un Lorito es directamente una suposición. Está marcado "aprox.", pero si alguna vez hay que recortar la ficha, ese es el primer dato que sale — no el dólar.
+**Dónde está lo flojo de la ficha, por si alguien la discute** — de lo más firme a lo más blando:
+
+1. **Los precios** son exactos: están publicados.
+2. **Los días activos** son exactos: salen de `git log` en todas las fichas.
+3. **Los commits** son exactos en cuatro de las seis fichas. En Copiloto y Simulacro son un **prorrateo** de un repo compartido (ver la sección de tokens) — no se reproducen con un comando.
+4. **Los tokens** son inferidos, de datos reales pero con una constante supuesta: orden de magnitud, ±3×.
+5. **El dólar** hereda la incertidumbre de los tokens y no agrega nada propio: los precios son exactos y la mezcla está medida. Es exactamente tan sólido como los tokens, ni más ni menos — por eso no tiene sentido sacar uno y dejar el otro.
+6. **El reparto de modelos** es el eslabón más débil: sale de la memoria de Axel, y el 15% de Fable en Copiloto y Envía un Lorito es directamente una suposición.
+
+Si alguna vez hay que recortar la ficha, el orden de salida es de abajo hacia arriba: primero el reparto de modelos, no el dólar.
 
 ## 📚 De dónde salen las descripciones
 
