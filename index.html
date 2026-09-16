@@ -283,8 +283,7 @@
   .ov-foot{ margin-top:auto; padding-top:1.2em; }
   .tech{
     display:flex; flex-direction:column; gap:.85em;
-    padding:.85em 0 .9em; border-top:1px solid var(--border);
-  }
+    padding:.85em 0 .9em; border-top:1px solid var(--border); position:relative; }
   .tech-modelos{ display:flex; flex-direction:column; gap:.4em; max-width:34em; }
   .mbar{
     display:flex; height:.45em; border-radius:.25em; overflow:hidden;
@@ -309,6 +308,46 @@
   }
   .mt-aprox{ color:var(--faint); opacity:.7; }
   .tech-v{ font-size:.85em; font-weight:600; letter-spacing:-.01em; color:var(--text); }
+
+  /* La "i" del benchmark. Abre una nota flotante con la referencia publica
+     contra la que se contrasta la estimacion. Va posicionada absoluta para
+     que abrirla no cambie el alto del panel y no haya que refitear. */
+  /* El label es .62em, asi que la "i" compensa con 1.5em para no quedar
+     microscopica. El ::after le da el area tactil de 44px que el circulito
+     dibujado no alcanza a cubrir. */
+  .info{
+    position:relative; vertical-align:-.22em;
+    display:inline-flex; align-items:center; justify-content:center;
+    width:1.35em; height:1.35em; margin-left:.6em; padding:0;
+    border:1px solid var(--border-2); border-radius:50%; background:var(--card);
+    font-family:var(--mono); font-size:1.5em; font-weight:700; line-height:1;
+    letter-spacing:0; text-transform:none;
+    color:var(--faint); cursor:pointer;
+    transition:color .18s, border-color .18s, background .18s;
+  }
+  .info::after{
+    content:''; position:absolute; top:50%; left:50%;
+    transform:translate(-50%,-50%);
+    min-width:44px; min-height:44px; width:100%; height:100%;
+  }
+  .info:hover, .info[aria-expanded="true"]{
+    color:var(--accent); border-color:var(--accent); background:#FFF6F0;
+  }
+  .bench{
+    position:absolute; left:0; right:0; bottom:100%; z-index:5;
+    margin-bottom:.7em; padding:1em 1.15em;
+    background:var(--card); border:1px solid var(--border-2); border-radius:.9em;
+    box-shadow:0 4px 14px rgba(31,20,16,.08), 0 18px 40px rgba(31,20,16,.13);
+    font-size:.78em; line-height:1.5; color:var(--muted);
+    display:flex; flex-direction:column; gap:.6em;
+  }
+  .bench[hidden]{ display:none; }
+  .bench b{ color:var(--text); font-weight:700; }
+  .bench .bl{
+    display:block; font-family:var(--mono); font-size:.82em; font-weight:700;
+    letter-spacing:.14em; text-transform:uppercase; color:var(--accent-deep);
+    margin-bottom:.15em;
+  }
 
   .visit{
     display:inline-flex; align-items:center; gap:.6em; align-self:flex-start;
@@ -965,7 +1004,10 @@ function fichaTecnica(p){
   if(p.tech && p.tech.length) celdas.push({ l:'Tecnología', v:p.tech.join(' · ') });
   if(p.ritmo) celdas.push({ l:'Ritmo', v:p.ritmo });
   if(p.prompts) celdas.push({ l:'Prompts', v:p.prompts });
-  if(p.tokens) celdas.push({ l:'Tokens <span class="mt-aprox">estimados</span>', v:p.tokens });
+  if(p.tokens) celdas.push({
+    l:'Tokens <span class="mt-aprox">estimados</span>' +
+      '<button class="info" type="button" aria-expanded="false" aria-controls="bench"' +
+      ' aria-label="De dónde sale este número">i</button>', v:p.tokens });
   if(p.costo) celdas.push({ l:'Equivalente <span class="mt-aprox">en API</span>', v:p.costo });
 
   const modelos = (p.modelos && p.modelos.length) ? barraModelos(p.modelos) : '';
@@ -976,7 +1018,22 @@ function fichaTecnica(p){
     : '';
   const nota = p.nota ? '<p class="tech-nota">' + esc(p.nota) + '</p>' : '';
 
-  return (modelos || fila || nota) ? '<div class="tech">' + modelos + fila + nota + '</div>' : '';
+  /* La referencia publica contra la que se contrasta la estimacion. Sale de
+     la "i" de la celda de Tokens; se explica en CLAUDE.md. */
+  const bench = p.tokens
+    ? '<div class="bench" id="bench" role="note" hidden>' +
+        '<span><span class="bl">Cómo se estima</span>' +
+        'Las horas de trabajo salen de los timestamps de git. La tasa de consumo, ' +
+        'del panel de uso de Claude Code.</span>' +
+        '<span><span class="bl">Para comparar</span>' +
+        'El caso público más citado de 2026: un desarrollador midió ' +
+        '<b>10.000 M de tokens en 8 meses</b> — US$ 15.000 a precio de API, ' +
+        'US$ 800 pagados con suscripción. Son ~1.250 M por mes; el proyecto ' +
+        'más caro de acá es 380 M.</span>' +
+      '</div>'
+    : '';
+
+  return (modelos || fila || nota) ? '<div class="tech">' + bench + modelos + fila + nota + '</div>' : '';
 }
 
 function overlayHTML(p, i){
@@ -1149,8 +1206,28 @@ window.addEventListener('popstate', (e) => {
   }
 });
 
+/* La nota del benchmark. Se cierra tocando afuera, con la "i" de nuevo o con
+   Escape — y Escape la cierra a ella primero, no al detalle entero. */
+function cerrarBench(){
+  const b = overlay.querySelector('.bench'), i = overlay.querySelector('.info');
+  if(!b || b.hidden) return false;
+  b.hidden = true;
+  if(i) i.setAttribute('aria-expanded', 'false');
+  return true;
+}
+
 overlay.addEventListener('click', (e) => {
-  if(e.target.closest('.close')) cerrar();
+  if(e.target.closest('.close')){ cerrar(); return; }
+  const i = e.target.closest('.info');
+  if(i){
+    const b = overlay.querySelector('.bench');
+    if(!b) return;
+    const abrir = b.hidden;
+    b.hidden = !abrir;
+    i.setAttribute('aria-expanded', String(abrir));
+    return;
+  }
+  if(!e.target.closest('.bench')) cerrarBench();
 });
 
 grid.addEventListener('click', (e) => {
@@ -1161,7 +1238,7 @@ grid.addEventListener('click', (e) => {
 });
 
 document.addEventListener('keydown', (e) => {
-  if(e.key === 'Escape'){ cerrar(); return; }
+  if(e.key === 'Escape'){ if(!cerrarBench()) cerrar(); return; }
   /* Con el detalle abierto el Tab se escapaba al fondo, que esta tapado:
      dos tabs y estabas navegando fichas invisibles. Lo devuelve al modal. */
   if(e.key !== 'Tab' || abierta < 0) return;

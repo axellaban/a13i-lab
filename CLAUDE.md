@@ -119,7 +119,7 @@ Reglas:
 - `modelos` / `tech` / `ritmo` / `tokens` / `costo` arman la ficha técnica al pie del detalle: una barra con el reparto de modelos y debajo una grilla de celdas. **El orden va de lo medido a lo estimado** — tecnología y ritmo salen de los repos, tokens y equivalente se infieren de eso. La credibilidad se gana en ese orden: primero lo que se puede verificar, y recién ahí la estimación.
 - `ritmo` son commits y días activos. Es el dato más legible de la ficha — cuando Axel describe un proyecto no dice "27 M de tokens", dice "estuve dos semanas". **Los días siempre salen de git; los commits también, salvo en Copiloto y Simulacro**, que comparten repo y llevan un prorrateo (está explicado en la sección de tokens). No lo presentes como "exacto de git" sin esa salvedad.
 - **`modelos` es de memoria de Axel, y la página lo marca "aprox."** El patrón que él describe: casi siempre Opus 5, con Sonnet 5 alrededor del 40%, y Sonnet nunca falta cuando hay algún modelo de Claude. Simulacro y el Dashboard son solo Opus + Sonnet (sin Fable). Loro Run y Arquitectura Transformer son 100% GPT-6-Astra. El reparto exacto donde entra Fable (15%) es una suposición, no un dato que él haya dado.
-- **`tokens` es una estimación y la página lo dice** (la etiqueta es "Tokens estimados"). Ver abajo de dónde sale.
+- **`tokens` es una estimación y la página lo dice** (la etiqueta es "Tokens estimados"). Ver abajo de dónde sale. Al lado lleva una **`i`** que abre una nota flotante (`.bench`) con el método en una línea y el benchmark público contra el que se contrasta. Aparece sola cuando el proyecto tiene `tokens`; el texto está hardcodeado en `fichaTecnica()`, así que **si cambian las cifras hay que actualizar el "380 M" que menciona la nota**.
 - Todo el contenido pasa por `esc()` antes de entrar al DOM. No romper eso al agregar campos.
 
 ## 🖼️ El arte de las fichas
@@ -290,6 +290,8 @@ El `0,28` es el único parámetro que no se mide: qué fracción del techo del p
 | Precio efectivo | US$ 1,50/M (ese dev) | US$ 0,98/M (medido en el panel de Axel) |
 
 **Conclusión del benchmark:** las cifras caen adentro de todas las bandas publicadas y del lado conservador en la mayoría. Un ingeniero que las discuta va a encontrar que son *menos* agresivas que el caso público más citado.
+
+**Esto está en la página.** La celda de Tokens lleva una `i` que abre la nota con el método y el caso de los 10 B. La idea es que el visitante que quiera discutir el número encuentre la referencia ahí mismo, sin tener que preguntar — y que el número se lea al lado de uno mucho más grande, no solo. Se cierra tocando afuera, con la `i` de nuevo o con Escape; Escape la cierra a ella primero y recién después el detalle.
 
 ### Lo que hay que contestar si alguien lo discute
 
