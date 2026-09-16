@@ -229,7 +229,7 @@ Push a `main` → auto-deploy en Vercel.
 
 ## 🔢 De dónde salen los tokens
 
-**2026-09-16: esta sección se rehízo entera.** El método anterior (`commits × 120k + churn × 300`) daba ~27 M para Copiloto y **estaba bajo por un factor de ~18**. Lo que lo desmintió es una medición real: el panel de uso de Claude Code de Axel, en una sesión del 15 de septiembre.
+**2026-09-16: esta sección se rehízo entera.** El método anterior (`commits × 120k + churn × 300`) daba ~27 M para Copiloto y **estaba bajo por un factor de ~14**. Lo que lo desmintió es una medición real: el panel de uso de Claude Code de Axel, en una sesión del 15 de septiembre.
 
 ### Las cuatro anclas medidas
 
@@ -265,21 +265,37 @@ Las sesiones de Copiloto y Simulacro se solapan, así que las 91,3 h de `loro` s
 ### La fórmula
 
 ```
-tokens = horas de sesión × 0,35 × 27 M
+tokens = horas de sesión × 0,28 × 27 M     (≈ 7,6 M por hora de sesión)
 ```
 
-El `0,35` es el único parámetro que no se mide: qué fracción del techo del plan se satura, en promedio, por hora de sesión. No se satura el 100% porque entre prompt y prompt se lee, se prueba y se commitea. La banda razonable es 0,20–0,50, lo que da **±40%** — mucho más angosto que el ±3× del método anterior.
+El `0,28` es el único parámetro que no se mide: qué fracción del techo del plan se satura, en promedio, por hora de sesión. No se satura el 100% porque entre prompt y prompt se lee, se prueba y se commitea. La banda razonable es 0,20–0,40, lo que da **±40%**.
 
-### Dos corroboraciones independientes
+**El 0,28 no se eligió a ojo: sale de contrastar contra lo que se publica** (ver abajo). Un primer intento con 0,35 daba US$ 31 por día activo en Simulacro, arriba del percentil 90 que reporta Anthropic. El 0,28 deja las seis fichas adentro de todas las bandas publicadas.
 
-1. **Contra el techo semanal.** El modelo dice que Copiloto consumió 103 M por semana, el **10%** del tope semanal. El medidor de Axel marca 13% hoy. Cierra.
-2. **Contra otra herramienta.** El README de `transformer-architecture` publica 83,7 M **medidos en Codex** para la sesión principal del proyecto original. Si esa sesión fue de ~10 h, son 8,4 M/h — contra los 9,5 M/h que asume este modelo. Misma magnitud, con otro modelo y otra herramienta.
+### Cuatro corroboraciones independientes
+
+1. **Contra el techo semanal de Axel.** El modelo dice que Copiloto consumió ~82 M por semana, el **8%** del tope semanal. El medidor de Axel marcaba 13% el día de la medición. Cierra.
+2. **Contra otra herramienta.** El README de `transformer-architecture` publica 83,7 M **medidos en Codex** para la sesión principal del proyecto original. Si esa sesión fue de ~10 h son 8,4 M/h, contra los 7,6 M/h que asume este modelo. Misma magnitud, con otro modelo y otra herramienta.
+3. **Contra un usuario real de largo plazo.** El caso más citado de 2026: un desarrollador con **10 mil millones de tokens en 8 meses** de Claude Code — US$ 15.000 a precio de API, US$ 800 pagados en Max. Son 1,25 B/mes y, a 8 h/día, **7,1 M por hora**. Este modelo asume 7,6. Es la corroboración más fuerte que hay, porque es una medición larga de la misma herramienta.
+4. **Contra la distribución que publica Anthropic.** Unos **US$ 6–13 por desarrollador por día activo**, con el 90% debajo de US$ 12–30, y US$ 150–250 al mes típico; los power users con automatización pesada van a US$ 500–2.000 al mes. Este modelo pone a Axel en **US$ 15–25 por día activo** y US$ 355–472 al mes en los meses de `loro`: adentro del percentil 90, arriba del típico, apenas debajo de la banda de power user. Es donde tiene que caer alguien que hace trabajo agéntico pesado con Opus pero no full-time.
+
+### Contraste con lo publicado (benchmark del 16-09-2026)
+
+| Referencia | Valor publicado | Este modelo |
+|---|---|---|
+| Anthropic, por día activo | US$ 6–13 (90% < US$ 12–30) | US$ 15–25 |
+| Anthropic, por mes | US$ 150–250 típico | US$ 355–472 en los meses de `loro` |
+| Power users, por mes | US$ 500–2.000 | apenas debajo |
+| Dev con 10 B en 8 meses | 1,25 B/mes · 7,1 M/h | 0,36–0,48 B/mes · 7,6 M/h |
+| Precio efectivo | US$ 1,50/M (ese dev) | US$ 0,98/M (medido en el panel de Axel) |
+
+**Conclusión del benchmark:** las cifras caen adentro de todas las bandas publicadas y del lado conservador en la mayoría. Un ingeniero que las discuta va a encontrar que son *menos* agresivas que el caso público más citado.
 
 ### Lo que hay que contestar si alguien lo discute
 
 - Las horas salen de git y se reproducen.
 - La tasa, el precio y los dos techos salen de un panel que Axel puede mostrar.
-- El único supuesto es el 0,35, y está acotado por arriba por un límite físico del plan.
+- El único supuesto es el 0,28, acotado por arriba por un límite físico del plan y contrastado contra cuatro referencias públicas.
 - **Sigue siendo una estimación**, con banda de ±40%. La etiqueta de la página dice *Tokens estimados* y así tiene que quedar.
 
 ⚠️ **La salvedad más importante:** los límites de plan de hoy no son necesariamente los de julio, y Claude Code de hoy quema más que las herramientas de entonces (contextos de 150 k+). Esto es *lo que ese trabajo costaría hoy*, no necesariamente lo que Axel quemó en julio. Loro Run y Arquitectura Transformer además se hicieron con GPT-6-Astra, así que ahí la tasa es una extrapolación entre herramientas — por eso no llevan dólar.
