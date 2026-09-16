@@ -229,56 +229,60 @@ Push a `main` → auto-deploy en Vercel.
 
 ## 🔢 De dónde salen los tokens
 
-No hay medición real del consumo de Axel en ningún lado, así que se estima desde la historia de cada repo. Los datos, medidos con `git log` sobre la historia completa (ojo: los clones con `--depth 1` mienten, hay que hacer `fetch --depth=1000`):
+**2026-09-16: esta sección se rehízo entera.** El método anterior (`commits × 120k + churn × 300`) daba ~27 M para Copiloto y **estaba bajo por un factor de ~18**. Lo que lo desmintió es una medición real: el panel de uso de Claude Code de Axel, en una sesión del 15 de septiembre.
 
-| Repo | Commits | Días activos | Churn (líneas) | Período |
-|---|---|---|---|---|
-| `loro` (Copiloto + Simulacro) | 308 | 24 | 41.399 | 10 jul → 21 ago |
-| `enviaunloro` | 84 | 10 | 25.473 | 26 ago → 9 sep |
-| `eday` | 67 | 13 | 28.847 | 6 jun → 27 ago |
-| `juego-fitness` | 4 | 2 | 1.199 | 13 → 14 sep |
-| `transformer-architecture` | 9 (2 son el fork) | 2 | 1.008 propias | 13 sep |
+### Las cuatro anclas medidas
 
-`loro` se reparte entre sus dos productos por los commits que tocan los archivos de cada uno. **Ojo con el solapamiento:** 106 commits tocan algo de Copiloto y 88 tocan algo de Simulacro, pero **21 tocan los dos**, así que sumarlos y restarlos del total cuenta esos 21 dos veces. El reparto correcto sale de los exclusivos:
-
-| | Commits | Churn |
+| Ancla | Valor | De dónde sale |
 |---|---|---|
-| Solo Copiloto | 85 | 9.187 |
-| Solo Simulacro | 67 | 7.510 |
-| Los dos | 21 | — |
-| Ninguno (lib, config, estilos) | 135 | 24.702 |
-| **Total repo** | **308** | **41.399** |
+| Tasa de quemado | **283 M tokens por hora de API** | 135,4 M en 28 min 43 s de API |
+| Precio real | **US$ 0,98 por millón** | US$ 133,01 / 135,4 M, todo Opus 5 |
+| Techo de 5 horas | **~135 M** → 27 M por hora de reloj | esa sesión dejó el medidor en 100% |
+| Techo semanal | **~1,04 B** | la misma sesión dejó el semanal en 13% |
 
-Cada producto se queda con sus exclusivos, los 21 compartidos se parten al medio y los 135 de infraestructura se prorratean por la razón de exclusivos (85:67 = **55,9/44,1**). Da **Copiloto 171** y **Simulacro 137**, que suman 308.
+El desglose de esa sesión: **132,1 M de lectura de caché (97,6%)**, 3,3 M de escritura de caché, 2,4 k de salida, 568 de entrada.
 
-El error anterior (114 restantes, prorrateo 55/45) se cancelaba solo: daba 169 y 139, que también sumaban 308 y movían los tokens menos de lo que redondea la ficha. Igual conviene tenerlo bien, porque el número que se muestra es el que alguien va a querer reproducir.
+⚠️ Los dos techos son **restricciones físicas**, y son lo que hace que esto no sea una invención. Un primer intento sin ellos daba 4,2 B para Copiloto — imposible, porque excede lo que el plan deja quemar en esas horas. El límite de 5 h es el que manda.
 
-⚠️ **Y por eso el `ritmo` de estos dos no es reproducible con un comando.** En el resto de las fichas un repo es un producto y el número sale de `git log`; acá es un prorrateo. El que muestra la página es el de la tabla de arriba. Los días activos sí son exactos, contados por fechas distintas de los commits de cada producto: Copiloto 20 días (10 jul → 11 ago), Simulacro 12 (20 jul → 11 ago).
+### Las horas de trabajo salen de git
 
-**La fórmula:** `commits × 120k + churn × 300`. Cada commit es una ronda con el agente, y lo que más pesa en una ronda no es el código que sale sino el contexto que entra una y otra vez.
+No de los commits: de los **timestamps**. Se agrupan los commits en sesiones (un hueco de más de 90 min corta la sesión) y se suma la duración de cada una, más 25 min de arranque antes del primer commit de cada sesión. El script está en el historial de la sesión; se reproduce con `git log --format=%ct`.
 
-**Qué valida la única medición real que hay, y qué no.** El README de `transformer-architecture` publica el consumo **medido** de la sesión original en Codex: 83,7 M de tokens — **80,9 M de lectura de caché**, 2,4 M de input sin cachear y 397 k de salida.
+| Producto | Commits | Sesiones | Horas | Commits/hora |
+|---|---|---|---|---|
+| Copiloto | 106 | — | **51,0** | 2,4 |
+| Simulacro | 88 | — | **40,3** | 3,1 |
+| `loro` total | 308 | 49 | 91,3 | 3,4 |
+| Envía un Lorito | 84 | 23 | 31,7 | 2,6 |
+| Dashboard eDay | 67 | 19 | 26,2 | 2,6 |
+| Loro Run | 4 | 3 | 1,4 | 2,8 |
+| Arquitectura Transformer | 9 | 3 | 2,3 | 3,9 |
 
-Eso valida dos cosas:
+Las sesiones de Copiloto y Simulacro se solapan, así que las 91,3 h de `loro` se reparten 55,9/44,1 igual que los commits.
 
-- **La forma del gasto.** 96,7% es contexto re-enviado, no generación. De ahí sale la mezcla con la que se valúa en dólares (ver la sección siguiente).
-- **El orden de magnitud.** Un proyecto así cuesta decenas de millones de tokens. Los ~27 M de Copiloto no son una cifra inflada: son *menos* que ese único proyecto medido.
+**Dato lindo y estable:** Axel hace **2,4 a 3,4 commits por hora** en los cuatro proyectos grandes. Una firma consistente de cómo trabaja.
 
-Y **no valida la constante de la fórmula.** Una versión anterior de este documento decía "~920 tokens por línea", dividiendo 83,7 M por las 91.046 líneas del commit de importación. **Ese número estaba mal.** De esas 91.046 líneas:
+### La fórmula
 
-| | Líneas |
-|---|---|
-| Three.js vendorizado (`dist/vendor/`) | 85.209 |
-| JSON generado por `scripts/build_spatial_architecture.py` | 4.670 |
-| **Texto efectivamente escrito** | **~5.800** (200 KB) |
+```
+tokens = horas de sesión × 0,35 × 27 M
+```
 
-La razón real es ~14.400 tokens por línea, **15× la que decía acá**. Dividir por código que nadie escribió y que ningún agente leyó entero no calibra nada.
+El `0,35` es el único parámetro que no se mide: qué fracción del techo del plan se satura, en promedio, por hora de sesión. No se satura el 100% porque entre prompt y prompt se lee, se prueba y se commitea. La banda razonable es 0,20–0,50, lo que da **±40%** — mucho más angosto que el ±3× del método anterior.
 
-Tampoco se puede calibrar el `× 120k` por commit contra esa medición, porque el proyecto original entró al repo como **un solo commit squasheado**: no hay commits entre los cuales dividir. El 120k es un supuesto razonado — una ronda de agente con ~100 k de contexto re-enviado — no un dato.
+### Dos corroboraciones independientes
 
-**Consecuencia, y esto es lo que hay que contestar si alguien la discute:** la fórmula da un **orden de magnitud, no una cifra**. La banda honesta es de ±3×. La respuesta correcta es "es una estimación derivada de la historia de git", nunca "está medido". Por eso la etiqueta de la página es *Tokens estimados* y no un número pelado.
+1. **Contra el techo semanal.** El modelo dice que Copiloto consumió 103 M por semana, el **10%** del tope semanal. El medidor de Axel marca 13% hoy. Cierra.
+2. **Contra otra herramienta.** El README de `transformer-architecture` publica 83,7 M **medidos en Codex** para la sesión principal del proyecto original. Si esa sesión fue de ~10 h, son 8,4 M/h — contra los 9,5 M/h que asume este modelo. Misma magnitud, con otro modelo y otra herramienta.
 
-**Sanity check contra lo que Axel recuerda:** dice que Copiloto + Simulacro fue lo más caro (≈49 M juntos, 308 commits en 6 semanas) y que el Dashboard lo hizo mucho más rápido (17 M, 67 commits). Los números dan lo mismo que su memoria.
+### Lo que hay que contestar si alguien lo discute
+
+- Las horas salen de git y se reproducen.
+- La tasa, el precio y los dos techos salen de un panel que Axel puede mostrar.
+- El único supuesto es el 0,35, y está acotado por arriba por un límite físico del plan.
+- **Sigue siendo una estimación**, con banda de ±40%. La etiqueta de la página dice *Tokens estimados* y así tiene que quedar.
+
+⚠️ **La salvedad más importante:** los límites de plan de hoy no son necesariamente los de julio, y Claude Code de hoy quema más que las herramientas de entonces (contextos de 150 k+). Esto es *lo que ese trabajo costaría hoy*, no necesariamente lo que Axel quemó en julio. Loro Run y Arquitectura Transformer además se hicieron con GPT-6-Astra, así que ahí la tasa es una extrapolación entre herramientas — por eso no llevan dólar.
 
 ## 💵 De dónde sale el costo en dólares
 
@@ -294,9 +298,11 @@ Precios por millón de tokens:
 | Sonnet 5 | $2 | $10 | $0,20 (0,1×) |
 | Fable 5.1 | $10 | $50 | $0,25 (0,025×) |
 
-**Lo que domina el número no es el precio, es la caché.** La mezcla sale de la única medición real que hay (el README de `transformer-architecture`): **96,7% lectura de caché, 2,9% input sin cachear, 0,47% salida**. Con esa mezcla, un millón de tokens totales cuesta US$ 0,75 en Opus 5, US$ 0,30 en Sonnet 5 y US$ 0,77 en Fable 5.1 — Fable termina casi igual que Opus porque su caché es 4× más barata y compensa su input más caro.
+**Lo que domina el número no es el precio, es la caché.** Y desde el 16-09 esto está **medido, no inferido**: el panel de Claude Code de Axel valuó 135,4 M de tokens en US$ 133,01 — **US$ 0,98 por millón**, con 97,6% de lectura de caché. Ese es el número que usa la página.
 
-La diferencia es enorme: Copiloto son ~27 M de tokens, que **sin caché** serían US$ 135 en Opus; con la mezcla medida son ~US$ 16.
+La versión anterior estimaba US$ 0,75 por millón aplicando la mezcla del README de `transformer-architecture` a los precios de lista. Quedaba **24% baja**. La medición la reemplaza.
+
+⚠️ **El precio medido no cuadra exactamente con el precio de lista, y conviene saberlo.** Con Opus 5 a US$ 5 input / US$ 25 output / US$ 0,50 lectura de caché, ese desglose debería dar US$ 86,74 (o US$ 99,11 si la escritura de caché va a TTL de 1 hora). El panel cobró US$ 133,01: **1,3–1,5× el precio de lista**. No se pudo determinar por qué desde acá — puede ser modo rápido (que en Opus 5 duplica la tarifa), puede ser cómo el panel computa la valuación. **Se usa el número medido, no el teórico**, porque es el que Axel puede mostrar en pantalla.
 
 **La escritura de caché no está en la tabla, y da igual.** Anthropic cobra el *write* a 1,25× el input, y la valuación de arriba trata todo el input sin cachear como input común. Es la aproximación correcta: el write es un cargo de una sola vez sobre el 2,9% del volumen, y aunque *todo* ese 2,9% fuese write, el millón sube de US$ 0,75 a US$ 0,78 en Opus (+4,8%; +9,4% en Fable, que tiene la caché más barata). Está muy por debajo del ±3× de los tokens — no vale la pena modelarlo.
 
@@ -307,9 +313,11 @@ Los dos proyectos de GPT-6-Astra **no llevan costo**: es un modelo de OpenAI y n
 1. **Los precios** son exactos: están publicados.
 2. **Los días activos** son exactos: salen de `git log` en todas las fichas.
 3. **Los commits** son exactos en cuatro de las seis fichas. En Copiloto y Simulacro son un **prorrateo** de un repo compartido (ver la sección de tokens) — no se reproducen con un comando.
-4. **Los tokens** son inferidos, de datos reales pero con una constante supuesta: orden de magnitud, ±3×.
-5. **El dólar** hereda la incertidumbre de los tokens y no agrega nada propio: los precios son exactos y la mezcla está medida. Es exactamente tan sólido como los tokens, ni más ni menos — por eso no tiene sentido sacar uno y dejar el otro.
-6. **El reparto de modelos** es el eslabón más débil: sale de la memoria de Axel, y el 15% de Fable en Copiloto y Envía un Lorito es directamente una suposición.
+4. **El precio por millón** está medido (US$ 0,98) y es mostrable en una captura.
+5. **Las horas de trabajo** salen de los timestamps de git y se reproducen con un script.
+6. **Los tokens** son estimados, pero anclados a cuatro mediciones y acotados por un límite físico del plan: banda de ±40%.
+7. **El dólar** hereda la incertidumbre de los tokens y no agrega nada propio — por eso no tiene sentido sacar uno y dejar el otro.
+8. **El reparto de modelos** es el eslabón más débil: sale de la memoria de Axel, y el 15% de Fable en Copiloto y Envía un Lorito es directamente una suposición.
 
 Si alguna vez hay que recortar la ficha, el orden de salida es de abajo hacia arriba: primero el reparto de modelos, no el dólar.
 
