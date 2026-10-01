@@ -131,7 +131,7 @@ Reglas:
 - El label del link se deriva de la URL (se le saca el protocolo y la barra final).
 - `modelos` / `tech` / `ritmo` / `tokens` / `costo` arman la ficha técnica al pie del detalle: una barra con el reparto de modelos y debajo una grilla de celdas. **El orden va de lo medido a lo estimado** — tecnología y ritmo salen de los repos, tokens y equivalente se infieren de eso. La credibilidad se gana en ese orden: primero lo que se puede verificar, y recién ahí la estimación.
 - `ritmo` son commits y días activos. Es el dato más legible de la ficha — cuando Axel describe un proyecto no dice "27 M de tokens", dice "estuve dos semanas". **Los días siempre salen de git; los commits también, salvo en Copiloto y Simulacro**, que comparten repo y llevan un prorrateo (está explicado en la sección de tokens). No lo presentes como "exacto de git" sin esa salvedad.
-- **`modelos` es de memoria de Axel, y la página lo marca "aprox."** El patrón que él describe: casi siempre Opus 5, con Sonnet 5 alrededor del 40%, y Sonnet nunca falta cuando hay algún modelo de Claude. Simulacro y el Dashboard son solo Opus + Sonnet (sin Fable). Loro Run y Arquitectura Transformer son 100% GPT-6-Astra. El reparto exacto donde entra Fable (15%) es una suposición, no un dato que él haya dado.
+- **`modelos` es de memoria de Axel, y la página lo marca "aprox."** El patrón que él describe: casi siempre Opus 5, con Sonnet 5 alrededor del 40%, y Sonnet nunca falta cuando hay algún modelo de Claude. ⚠️ **GTA XI rompe ese patrón: es 100% Opus 5.5**, confirmado por él. El patrón describe los proyectos de julio a septiembre, no es una regla. Simulacro y el Dashboard son solo Opus + Sonnet (sin Fable). Loro Run y Arquitectura Transformer son 100% GPT-6-Astra. El reparto exacto donde entra Fable (15%) es una suposición, no un dato que él haya dado.
 - **`tokens` es una estimación y la página lo dice** (la etiqueta es "Tokens estimados"). Ver abajo de dónde sale. Al lado lleva una **`i`** que abre una nota flotante (`.bench`) con el método en una línea y el benchmark público contra el que se contrasta. Aparece sola cuando el proyecto tiene `tokens`; el texto está hardcodeado en `fichaTecnica()`, así que **si cambian las cifras hay que actualizar el "380 M" que menciona la nota**.
 - Todo el contenido pasa por `esc()` antes de entrar al DOM. No romper eso al agregar campos.
 
@@ -316,7 +316,7 @@ El `0,28` es el único parámetro que no se mide: qué fracción del techo del p
 - El único supuesto es el 0,28, acotado por arriba por un límite físico del plan y contrastado contra cuatro referencias públicas.
 - **Sigue siendo una estimación**, con banda de ±40%. La etiqueta de la página dice *Tokens estimados* y así tiene que quedar.
 
-**Dos casos nuevos (01-10-2026).** *GTA XI · Conurbano*: 10 commits en 2 sesiones de un solo día, 3,5 h → ~27 M y ~US$ 26. Cae clavado en la firma de Axel (2,9 commits/hora). *Almost Real Street Fighter* **no lleva tokens ni dólar**: lo de Axel ahí son 2 commits de configuración, y poner una cifra sugeriría que lo construyó él.
+**Dos casos nuevos (01-10-2026).** *GTA XI · Conurbano*: 10 commits en 2 sesiones de un solo día, 3,5 h → ~27 M y ~US$ 16 (es 100% Opus 5.5, que tiene la caché 60% más barata — ver la sección del dólar). ⚠️ **Los ~27 M son probablemente un piso:** el techo de 27 M/hora salió de una sesión de Opus 5, y con Opus 5.5 los límites de Pro y Max subieron. No hay medición del techo nuevo, así que se deja el viejo. Cae clavado en la firma de Axel (2,9 commits/hora). *Almost Real Street Fighter* **no lleva tokens ni dólar**: lo de Axel ahí son 2 commits de configuración, y poner una cifra sugeriría que lo construyó él.
 
 **Y apareció una quinta corroboración, la mejor para el techo.** El README de `almost-real-street-fighter` dice que el original se construyó en el hackathon de Anthropic **en una hora, con US$ 25 de tokens**. A los US$ 0,98 por millón medidos, son ~25,5 M en una hora de reloj — contra el techo de 27 M/hora que sale del límite de 5 h. Una hora de hackathon a fondo satura el techo casi exacto. Es la confirmación más directa de que el techo es real y de que el `0,28` es la fracción correcta para trabajo normal, no a fondo.
 
@@ -330,11 +330,14 @@ La página **no aclara nada sobre suscripciones**, y es deliberado: una etiqueta
 
 Precios por millón de tokens:
 
-| Modelo | Input | Output | Lectura de caché |
-|---|---|---|---|
-| Opus 5 | $5 | $25 | $0,50 (0,1×) |
-| Sonnet 5 | $2 | $10 | $0,20 (0,1×) |
-| Fable 5.1 | $10 | $50 | $0,25 (0,025×) |
+| Modelo | Input | Output | Lectura de caché | Escritura de caché |
+|---|---|---|---|---|
+| **Opus 5.5** | **$4** | **$20** | **$0,20** | $5 (5 min) · $8 (1 h) |
+| Opus 5 | $5 | $25 | $0,50 (0,1×) | $6,25 (1,25×) |
+| Sonnet 5 | $2 | $10 | $0,20 (0,1×) | |
+| Fable 5.1 | $10 | $50 | $0,25 (0,025×) | |
+
+⚠️ **Opus 5.5 cambia el cálculo más de lo que parece.** Bajó 20% el input y el output, pero **la lectura de caché bajó 60%** ($0,50 → $0,20) — y como el 97,6% del gasto es justamente lectura de caché, el costo por millón **se parte casi al medio**. Con la mezcla medida: US$ 0,64/M de lista en Opus 5 contra US$ 0,39 en Opus 5.5 con caché de 1 hora (−39%). Aplicando el mismo factor 1,53× que se midió entre lista y panel, queda en **US$ 0,60 por millón** para Opus 5.5, contra los US$ 0,98 de Opus 5. Por eso el GTA, que es 100% Opus 5.5, lleva ~US$ 16 y no ~US$ 26.
 
 **Lo que domina el número no es el precio, es la caché.** Y desde el 16-09 esto está **medido, no inferido**: el panel de Claude Code de Axel valuó 135,4 M de tokens en US$ 133,01 — **US$ 0,98 por millón**, con 97,6% de lectura de caché. Ese es el número que usa la página.
 
