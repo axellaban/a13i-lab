@@ -37,7 +37,19 @@ madre de Dexter + nota del Mom Test     ← al pie, explica la regla del pitch
 
 Cada ficha es **arte + una sola frase**. Nada más: ni número, ni etiqueta, ni "ver el detalle" — repetidos seis veces no agregaban información. La única pista de que se abre es un `+` que aparece al pasar por encima (`.plus`, oculto en mobile).
 
-La grilla lleva **columnas explícitas, no `auto-fit`**. Con 8 fichas el `auto-fit` metía 6 arriba y dejaba 2 huérfanas con un hueco al lado; `repeat(4, …)` reparte 4+4. ⚠️ **Es un número a mano: si cambia la cantidad de proyectos hay que revisarlo** (con 6 conviene volver a 3+3 o a una fila; con 9, 3×3).
+La grilla lleva **columnas explícitas, no `auto-fit`**: `repeat(6, …)`, que con 8 fichas da 6+2.
+
+⚠️ **El número de columnas es contraintuitivo y hay que elegirlo midiendo, no a ojo.** Más columnas hacen las fichas más angostas y, como el arte es 16:10, también más bajas — así el `fit()` no tiene que bajar tanto y **la letra sale más grande**. Pero el renglón se acorta y el pitch se parte en más líneas. Medido a 1440×900 con 8 fichas:
+
+| Columnas | Pitch | Ancho de ficha | Líneas | |
+|---|---|---|---|---|
+| 4 (4+4) | 12,9px | 287px | 2 | parejo pero ilegible |
+| 5 (5+3) | 13,9px | 227px | 3 | |
+| **6 (6+2)** | **14,4px** | **187px** | **4** | **el elegido** |
+| 7 (7+1) | 14,4px | 158px | 5 | |
+| 8 (una fila) | 16,3px | 136px | 7 | **el texto desborda** |
+
+**El 6+2 deja un hueco en la última fila, y es a propósito:** repartir parejo en 4+4 cuesta 1,5px de letra, y eso se nota más que el hueco. Si cambia la cantidad de proyectos, **repetir esta medición** — no copiar el 6.
 
 ### Breakpoints
 
@@ -45,8 +57,8 @@ La ficha **nunca** se convierte en una fila horizontal con un thumbnail al costa
 
 | Ancho | Columnas | Qué más cambia |
 |---|---|---|
-| > 820px | 4 fijas (4+4) | el meme a la derecha del título |
-| 560–820px | 3 | el meme se achica y sube al lado del título; el `+` queda fijo y tenue, porque en touch no hay hover |
+| > 820px | 6 fijas (6+2) | el meme a la derecha del título |
+| 560–820px | 4 | el meme se achica y sube al lado del título; el `+` queda fijo y tenue, porque en touch no hay hover |
 | < 560px | 3 | con 8 fichas, 2 columnas daban 4 filas y el fit bajaba a 0,47 — el pitch quedaba en 5px |
 | < 400px o alto < 700px | 2 | el h1 se achica más que el resto: es el bloque más caro y, si paga él, el texto de las fichas queda legible |
 | landscape, alto < 540px | 6 en una fila | se oculta el meme; con 390px de alto no entran dos filas |
@@ -81,7 +93,7 @@ Dos escalas, las dos manejadas por JS, las dos con búsqueda binaria:
 
 Las dos se recalculan en `resize`. El `font-size` base ya es responsive por su cuenta (`clamp(10.5px, min(3.1vw, 1.78vh), 17px)`); `--s` es el ajuste fino encima de eso.
 
-**Consecuencia práctica:** cuantos más proyectos se sumen, más se achica todo. Con 8 fichas el estado medido es: wide 0,94 · desktop 0,79 · tablet 0,84 · iPhone 1,00 · iPhone SE 0,87 · landscape 0,99, sin scroll ni recorte en ninguno. **Al sumar el noveno hay que repetir esa barrida**, revisar el número de columnas (ver arriba) y, si hace falta, acortar los `pitch`.
+**Consecuencia práctica:** cuantos más proyectos se sumen, más se achica todo. Con 8 fichas el estado medido es: wide 0,99 · desktop 0,89 · laptop 0,88 · tablet 1,00 · iPhone 1,00 · iPhone SE 0,87 · landscape 0,99, sin scroll ni recorte en ninguno. **En teléfonos la letra ya está en su máximo físico:** subir el `clamp()` de la base no sirve porque `fit()` lo compensa bajando `--s` y el producto queda igual. El único margen ahí sería menos contenido por ficha. **Al sumar el noveno hay que repetir esa barrida**, revisar el número de columnas (ver arriba) y, si hace falta, acortar los `pitch`.
 
 ## ➕ Cómo agregar un proyecto
 
