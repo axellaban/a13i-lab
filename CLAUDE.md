@@ -30,13 +30,14 @@ a13i-lab/
 ```
 logo A13I_LAB
 título + bajada   |   meme        ← dos columnas en desktop, apiladas en mobile
-[ 01 ] [ 02 ] [ 03 ] [ 04 ] [ 05 ] [ 06 ]   ← grilla portfolio (hoy son 6)
+[ 01 ] [ 02 ] [ 03 ] [ 04 ]
+[ 05 ] [ 06 ] [ 07 ] [ 08 ]             ← grilla portfolio (hoy son 8)
 madre de Dexter + nota del Mom Test     ← al pie, explica la regla del pitch
 ```
 
 Cada ficha es **arte + una sola frase**. Nada más: ni número, ni etiqueta, ni "ver el detalle" — repetidos seis veces no agregaban información. La única pista de que se abre es un `+` que aparece al pasar por encima (`.plus`, oculto en mobile).
 
-La grilla es `repeat(auto-fit, minmax(12em, 1fr))`: reparte sola las fichas que haya, sin dejar huecos en la última fila. Con hasta 6 entran todas en una fila.
+La grilla lleva **columnas explícitas, no `auto-fit`**. Con 8 fichas el `auto-fit` metía 6 arriba y dejaba 2 huérfanas con un hueco al lado; `repeat(4, …)` reparte 4+4. ⚠️ **Es un número a mano: si cambia la cantidad de proyectos hay que revisarlo** (con 6 conviene volver a 3+3 o a una fila; con 9, 3×3).
 
 ### Breakpoints
 
@@ -44,9 +45,9 @@ La ficha **nunca** se convierte en una fila horizontal con un thumbnail al costa
 
 | Ancho | Columnas | Qué más cambia |
 |---|---|---|
-| > 820px | auto-fit (6 en una fila) | el meme a la derecha del título |
+| > 820px | 4 fijas (4+4) | el meme a la derecha del título |
 | 560–820px | 3 | el meme se achica y sube al lado del título; el `+` queda fijo y tenue, porque en touch no hay hover |
-| < 560px | 2 | |
+| < 560px | 3 | con 8 fichas, 2 columnas daban 4 filas y el fit bajaba a 0,47 — el pitch quedaba en 5px |
 | < 400px o alto < 700px | 2 | el h1 se achica más que el resto: es el bloque más caro y, si paga él, el texto de las fichas queda legible |
 | landscape, alto < 540px | 6 en una fila | se oculta el meme; con 390px de alto no entran dos filas |
 
@@ -76,11 +77,11 @@ Dos escalas, las dos manejadas por JS, las dos con búsqueda binaria:
 - **`--s`** (en `:root`) escala la página entera. Todo el layout está en `em` sobre el `font-size` de `.screen`, así que bajar `--s` achica todo proporcionalmente. `fit()` lo baja hasta que `.inner` entra en el alto del viewport (piso 0.45).
 - **`--so`** (en `.overlay`) hace lo mismo con el detalle abierto: `fitOverlay()` lo baja hasta que el contenido entra en el modal (piso 0.5), así nunca aparece scroll interno. Con el modal a 660px de alto hoy no necesita bajar de 1 en ningún viewport probado; si un proyecto trae mucho más texto, escala en vez de recortar.
 
-Si `fit()` llega al piso y **aun así** no entra (una pantalla rarísima, o muchos proyectos de golpe), habilita el scroll de `.screen`. Cortar contenido siempre es peor que scrollear; la premisa de la pantalla única no vale romper el contenido para sostenerla.
+**El piso de `fit()` es de legibilidad, no de geometría.** Vale `S_MIN = 0.62`. Antes era 0.45, y eso hacía que el fit "entrara" siempre, aunque el resultado fuera ilegible: al pasar a 8 fichas, un 375×667 terminaba en `--s` 0.47 con el pitch en **5 px**. Por debajo de 0.62 ahora habilita el scroll de `.screen`. Cortar o achicar el contenido hasta que no se lea es peor que scrollear; la premisa de la pantalla única no vale romper el contenido para sostenerla.
 
 Las dos se recalculan en `resize`. El `font-size` base ya es responsive por su cuenta (`clamp(10.5px, min(3.1vw, 1.78vh), 17px)`); `--s` es el ajuste fino encima de eso.
 
-**Consecuencia práctica:** cuantos más proyectos se sumen, más se achica todo. Al pasar de 6 conviene revisar a mano cómo queda en mobile chico (375×667 ya está en 0.82) y, si hace falta, bajar el `minmax` de la grilla o acortar los `pitch`.
+**Consecuencia práctica:** cuantos más proyectos se sumen, más se achica todo. Con 8 fichas el estado medido es: wide 0,94 · desktop 0,79 · tablet 0,84 · iPhone 1,00 · iPhone SE 0,87 · landscape 0,99, sin scroll ni recorte en ninguno. **Al sumar el noveno hay que repetir esa barrida**, revisar el número de columnas (ver arriba) y, si hace falta, acortar los `pitch`.
 
 ## ➕ Cómo agregar un proyecto
 
@@ -133,7 +134,9 @@ El objeto `ART` tiene un SVG por proyecto, dibujado a mano en la paleta del siti
 | `lorito` | el ave y el reloj | el ave recorre la estela con `offset-path`, la estela corre y la aguja gira |
 | `fitness` | figura con landmarks de pose | las alas aletean, el cuerpo rebota y los carriles se vienen encima |
 | `eday` | radar chart + heatmap del fact checking | el radar se deforma con el pitch y el heatmap se va pintando bloque a bloque |
-| `astra` | bloques de transformers | la atención corre entre los dos stacks y los bloques laten | Todos usan `viewBox="0 0 200 125"` (16:10, igual que `.art`) y `preserveAspectRatio="xMidYMid meet"`: así llenan exacto la ficha en desktop y se ven enteros, sin recorte, en el thumbnail cuadrado de mobile. El fondo de `.art` y `.ov-art` es plano `#FFFDF8` para que el encuadre nunca se note.
+| `astra` | bloques de transformers | la atención corre entre los dos stacks y los bloques laten |
+| `gta` | grilla de calles, la ruta, el tren del Roca y las estrellas de búsqueda | el auto recorre la ruta con `offset-path`, el tren cruza, los faroles laten y las estrellas se prenden de a una |
+| `fighter` | las dos barras de vida y los dos peleadores | el brazo tira la piña, el rival acusa el golpe, estalla la estrella de impacto y la barra de vida baja de golpe | Todos usan `viewBox="0 0 200 125"` (16:10, igual que `.art`) y `preserveAspectRatio="xMidYMid meet"`: así llenan exacto la ficha en desktop y se ven enteros, sin recorte, en el thumbnail cuadrado de mobile. El fondo de `.art` y `.ov-art` es plano `#FFFDF8` para que el encuadre nunca se note.
 
 **Para poner una captura real** en lugar del SVG: dejar el archivo en `assets/` y agregarle `imagen: '/assets/loquesea.webp'` al proyecto. El SVG queda como fallback si algún día se saca la imagen.
 
@@ -250,6 +253,7 @@ No de los commits: de los **timestamps**. Se agrupan los commits en sesiones (un
 
 | Producto | Commits | Sesiones | Horas | Commits/hora |
 |---|---|---|---|---|
+| GTA XI · Conurbano | 10 | 2 | **3,5** | 2,9 |
 | Copiloto | 106 | — | **51,0** | 2,4 |
 | Simulacro | 88 | — | **40,3** | 3,1 |
 | `loro` total | 308 | 49 | 91,3 | 3,4 |
@@ -299,6 +303,10 @@ El `0,28` es el único parámetro que no se mide: qué fracción del techo del p
 - La tasa, el precio y los dos techos salen de un panel que Axel puede mostrar.
 - El único supuesto es el 0,28, acotado por arriba por un límite físico del plan y contrastado contra cuatro referencias públicas.
 - **Sigue siendo una estimación**, con banda de ±40%. La etiqueta de la página dice *Tokens estimados* y así tiene que quedar.
+
+**Dos casos nuevos (01-10-2026).** *GTA XI · Conurbano*: 10 commits en 2 sesiones de un solo día, 3,5 h → ~27 M y ~US$ 26. Cae clavado en la firma de Axel (2,9 commits/hora). *Almost Real Street Fighter* **no lleva tokens ni dólar**: lo de Axel ahí son 2 commits de configuración, y poner una cifra sugeriría que lo construyó él.
+
+**Y apareció una quinta corroboración, la mejor para el techo.** El README de `almost-real-street-fighter` dice que el original se construyó en el hackathon de Anthropic **en una hora, con US$ 25 de tokens**. A los US$ 0,98 por millón medidos, son ~25,5 M en una hora de reloj — contra el techo de 27 M/hora que sale del límite de 5 h. Una hora de hackathon a fondo satura el techo casi exacto. Es la confirmación más directa de que el techo es real y de que el `0,28` es la fracción correcta para trabajo normal, no a fondo.
 
 ⚠️ **La salvedad más importante:** los límites de plan de hoy no son necesariamente los de julio, y Claude Code de hoy quema más que las herramientas de entonces (contextos de 150 k+). Esto es *lo que ese trabajo costaría hoy*, no necesariamente lo que Axel quemó en julio. Loro Run y Arquitectura Transformer además se hicieron con GPT-6-Astra, así que ahí la tasa es una extrapolación entre herramientas — por eso no llevan dólar.
 
@@ -351,6 +359,8 @@ Las de los cuatro productos del Universo Loro están escritas leyendo el código
 | Loro Run | `axellaban/juego-fitness` | el-loro-corre.vercel.app |
 | Arquitectura Transformer | `axellaban/transformer-architecture` (fork) | transformer-architecture.vercel.app |
 | Dashboard eCommerce Day 2026 | `axellaban/eday-argentina-2026-eCommerce-StartUp-Competition` | eday-2026-argentina-demo-day.vercel.app |
+| GTA XI · Conurbano | `axellaban/GTA`, **rama `conurbano`** (no `main`) | gta-6-conurba.vercel.app |
+| Almost Real Street Fighter | `axellaban/almost-real-street-fighter` (fork) | almost-real-street-fighter.vercel.app |
 
 `axellaban/universo-loro` es la página índice que los agrupa. Copiloto y Simulacro son **dos productos distintos** del mismo repo, no dos nombres de lo mismo.
 
