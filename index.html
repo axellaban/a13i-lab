@@ -989,11 +989,13 @@ const ART = {
 const PROYECTOS = [
   {
     titulo: 'GTA XI · Conurbano',
-    modelos: [{ n:'Opus 5.5', p:100 }],
+    modelos: [{ n:'Opus 5.5' }, { n:'Haiku 4.5' }, { n:'GPT-6.1-Sol' }, { n:'GPT-5.6-Terra' }, { n:'GPT-6-Astra' }],
+    usoRegistrado: true,
+    fuenteUso: 'Suma de los 7 registros de Claude y Codex aportados por Axel, del 1 al 5 de octubre de 2026: 1.902.898.900 tokens y US$ 627,29 de equivalente en API. Las filas con varios modelos no desglosan su participación; por eso no se asignan porcentajes. Los volúmenes originales están redondeados.',
     tech: ['Three.js', 'Mapa real de OSM', 'WebGL'],
-    ritmo: '10 commits en 1 día',
-    tokens: '~27 M',
-    costo: '~US$ 16',
+    ritmo: '193 commits en 6 días activos',
+    tokens: '1.902,9 M',
+    costo: 'US$ 627,29',
     pitch: 'El GTA VI pero versión conurbano bonaerense.',
     art: 'gta',
     lead: 'Juego de mundo abierto en el navegador, alrededor de la estación Temperley. Nada de motor ni assets comprados: las casas, los trenes y la gente se generan por código.',
@@ -1007,7 +1009,7 @@ const PROYECTOS = [
       ]},
       { n: 'Corre en el celular', d: 'Se instala como app en iPhone y Android con service worker, y arranca en calidad baja si detecta un teléfono. La rueda del mouse acerca y aleja la cámara.' }
     ],
-    nota: 'Vive en la rama conurbano de axellaban/GTA. El repo es un fork, pero esa rama arranca de cero: el juego es propio, no sale del código del fork.',
+    nota: 'Juego propio en la rama main de axellaban/GTA, iniciado desde cero. Commits y días activos verificados al 05/10/2026; uso de Claude y Codex registrado del 01 al 05/10.',
     link: 'https://gta-6-conurba.vercel.app/'
   },
   {
@@ -1181,17 +1183,18 @@ function cardHTML(p, i){
    repo por un multiplicador segun como se construyo. */
 const MODELO_COLORES = ['#D4612A', '#E9A57A', '#F0CDB0'];
 
-function barraModelos(modelos){
+function barraModelos(modelos, registrado){
+  const conReparto = modelos.every(m => Number.isFinite(m.p));
   const barra = modelos.map((m, k) =>
     '<i style="width:' + m.p + '%;background:' + MODELO_COLORES[k % 3] + '"></i>'
   ).join('');
   const leyenda = modelos.map((m, k) =>
     '<span><em style="background:' + MODELO_COLORES[k % 3] + '"></em>' +
-    '<b>' + esc(m.n) + '</b> ' + m.p + '%</span>'
+    '<b>' + esc(m.n) + '</b>' + (conReparto ? ' ' + m.p + '%' : '') + '</span>'
   ).join('');
   return '<div class="tech-modelos">' +
-    '<span class="tech-l">Modelos <span class="mt-aprox">aprox.</span></span>' +
-    '<span class="mbar">' + barra + '</span>' +
+    '<span class="tech-l">Modelos <span class="mt-aprox">' + (registrado ? 'registrados' : 'aprox.') + '</span></span>' +
+    (conReparto ? '<span class="mbar">' + barra + '</span>' : '') +
     '<span class="mleg">' + leyenda + '</span>' +
   '</div>';
 }
@@ -1204,12 +1207,12 @@ function fichaTecnica(p){
   if(p.ritmo) celdas.push({ l:'Ritmo', v:p.ritmo });
   if(p.prompts) celdas.push({ l:'Prompts', v:p.prompts });
   if(p.tokens) celdas.push({
-    l:'Tokens <span class="mt-aprox">estimados</span>' +
+    l:'Tokens <span class="mt-aprox">' + (p.usoRegistrado ? 'registrados' : 'estimados') + '</span>' +
       '<button class="info" type="button" aria-expanded="false" aria-controls="bench"' +
       ' aria-label="De dónde sale este número">i</button>', v:p.tokens });
   if(p.costo) celdas.push({ l:'Equivalente <span class="mt-aprox">en API</span>', v:p.costo });
 
-  const modelos = (p.modelos && p.modelos.length) ? barraModelos(p.modelos) : '';
+  const modelos = (p.modelos && p.modelos.length) ? barraModelos(p.modelos, p.usoRegistrado) : '';
   const fila = celdas.length
     ? '<div class="tech-row">' + celdas.map(c =>
         '<span class="tech-cel"><span class="tech-l">' + c.l + '</span>' +
@@ -1221,6 +1224,7 @@ function fichaTecnica(p){
      la "i" de la celda de Tokens; se explica en CLAUDE.md. */
   const bench = p.tokens
     ? '<div class="bench" id="bench" role="note" hidden>' +
+        (p.fuenteUso ? '<span><span class="bl">Fuente del registro</span>' + esc(p.fuenteUso) + '</span>' :
         '<span><span class="bl">Cómo se estima</span>' +
         'Las horas de trabajo salen de los timestamps de git. La tasa de consumo, ' +
         'del panel de uso de Claude Code.</span>' +
@@ -1228,7 +1232,7 @@ function fichaTecnica(p){
         'El caso público más citado de 2026: un desarrollador midió ' +
         '<b>10.000 M de tokens en 8 meses</b> — US$ 15.000 a precio de API, ' +
         'US$ 800 pagados con suscripción. Son ~1.250 M por mes; el proyecto ' +
-        'más caro de acá es 380 M.</span>' +
+        'Copiloto de Entrevistas se estima en 380 M.</span>') +
       '</div>'
     : '';
 
